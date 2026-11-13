@@ -1,0 +1,20 @@
+services:
+  triage-api:
+    build:
+      context: ./triage_backend
+      dockerfile: Dockerfile
+    container_name: future_health_triage_api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./triage_backend/.env
+    volumes:
+      # Maps local Qdrant vector database so indexed embeddings persist across container lifecycles
+      - ./triage_backend/local_qdrant_data:/app/local_qdrant_data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

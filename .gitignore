@@ -1,0 +1,30 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.pyc
+
+# Local vector database storage
+local_qdrant_data/
+*.db
+*.sqlite3
+
+# Flutter and Dart
+edge_client/.dart_tool/
+edge_client/build/
+edge_client/.flutter-plugins
+edge_client/.flutter-plugins-dependencies
+edge_client/.packages
+edge_client/.pub-cache/
+edge_client/.pub/
+*.lock
+
+# Android build outputs & local config
+edge_client/android/.gradle/
+edge_client/android/local.properties
+*.apk
+
+# Environment secrets
+.env

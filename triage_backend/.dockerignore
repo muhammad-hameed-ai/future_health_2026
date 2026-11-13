@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+local_qdrant_data/
+.git/
+.gitignore
+*.log
+.DS_Store
