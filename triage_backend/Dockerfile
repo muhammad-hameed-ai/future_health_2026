@@ -33,8 +33,8 @@ COPY app/ ./app/
 # Finalize project install into virtualenv
 RUN uv sync --frozen --no-dev
 
-# Expose API port
+# Expose API port (Render provides dynamic $PORT, defaults to 8000 locally)
 EXPOSE 8000
 
-# Run FastAPI production ASGI server
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run FastAPI production ASGI server binding dynamically to $PORT
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

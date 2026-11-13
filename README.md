@@ -152,3 +152,4 @@ flutter test           # Runs 20/20 clinical validation unit test suites
 
 ## 📜 Regulatory & Clinical Disclaimers
 *SkinGuard UAE is developed for clinical decision support under investigational protocols conforming to the Abu Dhabi Department of Health Future Health Challenge 2026. The software operates as Class IIa Software as a Medical Device (SaMD) under IEC 62304 / ISO 13485 design control standards.*
+

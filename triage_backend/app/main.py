@@ -20,6 +20,7 @@ app.add_middleware(
 )
 
 @app.get("/health")
+@app.get("/healthz")
 async def health_check():
     """Simple health check endpoint to verify the server is running."""
     return {"status": "healthy", "service": "Triage API"}
