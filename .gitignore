@@ -28,3 +28,4 @@ edge_client/android/local.properties
 
 # Environment secrets
 .env
+
