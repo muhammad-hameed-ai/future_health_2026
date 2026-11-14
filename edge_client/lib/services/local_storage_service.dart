@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/saved_scan_record.dart';
+import '../models/user_profile.dart';
 
 /// Local Database Engine for Persistent Clinical Scan Storage.
 /// Guarantees offline, Zero-PII record keeping directly on the mobile device.
@@ -202,6 +203,45 @@ class LocalStorageService {
         loopClosureNotes: 'Dermoscopic evaluation confirmed benign seborrheic keratosis. Annual monitoring recommended.',
       ),
     ];
+  }
+
+  /// Retrieves persisted user session profile
+  static Future<UserProfile?> getUserProfile() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/skinguard_user_profile.json');
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        if (content.trim().isNotEmpty) {
+          return UserProfile.fromJson(jsonDecode(content) as Map<String, dynamic>);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error reading user profile: $e');
+    }
+    return null;
+  }
+
+  /// Persists user session profile
+  static Future<void> saveUserProfile(UserProfile user) async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/skinguard_user_profile.json');
+      await file.writeAsString(jsonEncode(user.toJson()));
+    } catch (e) {
+      debugPrint('Error saving user profile: $e');
+    }
+  }
+
+  /// Clears user session on logout
+  static Future<void> clearUserProfile() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/skinguard_user_profile.json');
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (_) {}
   }
 }
 

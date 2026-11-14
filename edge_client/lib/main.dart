@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'screens/welcome_logo_screen.dart';
 import 'services/triage_api_client.dart';
+import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await TriageApiClient.initSavedHost();
+  await AuthService.initAuth();
   runApp(const SkinGuardEdgeApp());
 }
 

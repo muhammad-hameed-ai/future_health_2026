@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'main_navigation_shell.dart';
+import 'login_screen.dart';
+import '../services/auth_service.dart';
 
 /// Professional Welcome & Logo Gateway Screen.
 /// Showcases the animated dermoscopy radar logo, the 2-step clinical architecture,
@@ -32,6 +34,28 @@ class _WelcomeLogoScreenState extends State<WelcomeLogoScreen>
   }
 
   void _navigateToGateway(BuildContext context, {int initialTab = 0}) {
+    if (!AuthService.isAuthenticated) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => LoginScreen(
+            onLoginSuccess: () {
+              Navigator.of(context).pushReplacement(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      MainNavigationShell(initialIndex: initialTab),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  transitionDuration: const Duration(milliseconds: 350),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>

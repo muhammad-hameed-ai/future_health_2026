@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.models.schemas import TriageRequest, TriageResponse
 from app.services import rag_agent
+from app.routers import auth
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEB_DIST_DIR = os.path.join(BASE_DIR, "web_dist")
@@ -25,6 +26,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include Authentication & Profile Management Router
+app.include_router(auth.router)
 
 # Mount Flutter Web Live Application at /app
 if os.path.exists(WEB_DIST_DIR):

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import '../models/saved_scan_record.dart';
+import '../models/user_profile.dart';
 import '../services/local_storage_service.dart';
 import '../services/pdf_export_service.dart';
 import '../services/triage_api_client.dart';
+import '../services/auth_service.dart';
+import 'profile_screen.dart';
+import 'login_screen.dart';
 
 /// Executive UAE Health Dashboard Screen for SkinGuard UAE.
 /// Modeled after Apple Health and Babylon Health, showcasing the Future Health Challenge 2026.
@@ -126,12 +130,89 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                           letterSpacing: -0.5,
                         ),
                       ),
+                      ValueListenableBuilder<UserProfile?>(
+                        valueListenable: AuthService.currentUserNotifier,
+                        builder: (ctx, user, _) {
+                          if (user == null) return const SizedBox.shrink();
+                          return Text(
+                            widget.isArabic
+                                ? 'مرحباً، ${user.fullName.split(' ').first}'
+                                : 'Welcome, ${user.fullName.split(' ').first}',
+                            style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: brandSky),
+                          );
+                        },
+                      ),
                     ],
                   ),
 
                   // Language, Cloud & Privacy Badges
                   Row(
                     children: [
+                      // User Profile Avatar Button
+                      ValueListenableBuilder<UserProfile?>(
+                        valueListenable: AuthService.currentUserNotifier,
+                        builder: (ctx, user, _) {
+                          return InkWell(
+                            onTap: () {
+                              if (user != null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ProfileScreen(
+                                      onLoggedOut: () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => LoginScreen(
+                                              onLoginSuccess: () => Navigator.pop(context),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => LoginScreen(
+                                      onLoginSuccess: () => Navigator.pop(context),
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF0FDF4),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: const Color(0xFFBBF7D0)),
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 7,
+                                    backgroundColor: alertRoutine,
+                                    child: Text(
+                                      user?.initials ?? '?',
+                                      style: const TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: Colors.white),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    user?.fullName.split(' ').first ?? 'Sign In',
+                                    style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Color(0xFF166534)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 6),
                       // Cloud Hub Badge / Button
                       InkWell(
                         onTap: () => _showCloudSettingsDialog(context),

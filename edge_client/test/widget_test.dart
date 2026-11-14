@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:edge_client/main.dart';
+import 'package:edge_client/models/user_profile.dart';
+import 'package:edge_client/screens/login_screen.dart';
+import 'package:edge_client/services/auth_service.dart';
 
 class _TestHttpOverrides extends HttpOverrides {
   @override
@@ -12,7 +15,6 @@ class _TestHttpOverrides extends HttpOverrides {
 }
 
 HttpClient _createMockHttpClient() {
-  // A mock client that returns 200 for any request
   final client = _MockHttpClient();
   return client;
 }
@@ -90,6 +92,14 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    // Pre-authenticate for the smoke test so dashboard shell is accessed directly
+    AuthService.currentUserNotifier.value = UserProfile(
+      id: 'demo-judge',
+      fullName: 'Fatima Al-Mansouri, RN',
+      email: 'demo@skinguard.ae',
+      role: 'clinician_navigator',
+    );
+
     await tester.pumpWidget(const SkinGuardEdgeApp());
     expect(find.text('SkinGuard AI'), findsOneWidget);
     expect(find.text('2-STEP CLINICAL ARCHITECTURE'), findsOneWidget);
@@ -112,5 +122,25 @@ void main() {
     // Verify Scan Wizard is now active
     expect(find.text('Scan Wizard'), findsOneWidget);
     expect(find.text('Patient Context & Demographics'), findsOneWidget);
+  });
+
+  testWidgets('LoginScreen renders authentication UI and quick demo access', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginScreen(onLoginSuccess: () {}),
+      ),
+    );
+
+    expect(find.text('SkinGuard UAE'), findsOneWidget);
+    expect(find.text('Sign In'), findsOneWidget);
+    expect(find.text('Create Account'), findsOneWidget);
+    expect(find.text('Remember Me'), findsOneWidget);
+    expect(find.text('Forgot Password?'), findsOneWidget);
+    expect(find.text('1-Tap Sign In'), findsOneWidget);
   });
 }
