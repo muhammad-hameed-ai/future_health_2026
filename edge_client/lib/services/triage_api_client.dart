@@ -119,6 +119,9 @@ class TriageApiClient {
       list.add(formatted.endsWith('/api/v1') ? formatted : '$formatted/api/v1');
     }
 
+    // Primary Production Render Cloud Gateway (Global HTTPS 24/7)
+    list.add('https://future-health-2026.onrender.com/api/v1');
+
     const customEnv = String.fromEnvironment('BACKEND_URL');
     if (customEnv.isNotEmpty) {
       list.add(customEnv);

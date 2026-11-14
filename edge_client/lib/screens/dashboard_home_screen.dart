@@ -860,7 +860,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                 keyboardType: TextInputType.url,
                 autocorrect: false,
                 decoration: InputDecoration(
-                  hintText: 'e.g. https://skinguard-api.onrender.com',
+                  hintText: 'https://future-health-2026.onrender.com',
                   hintStyle: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
                   prefixIcon: const Icon(Icons.link_rounded, size: 18, color: Color(0xFF0284C7)),
                   filled: true,
@@ -881,7 +881,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                     label: const Text('Render (Cloud)', style: TextStyle(fontSize: 10.5)),
                     avatar: const Icon(Icons.cloud_done_rounded, size: 14),
                     onPressed: () {
-                      controller.text = 'https://skinguard-backend.onrender.com';
+                      controller.text = 'https://future-health-2026.onrender.com';
                       setModalState(() {});
                     },
                   ),
