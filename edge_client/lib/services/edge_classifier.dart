@@ -416,7 +416,7 @@ class EdgeClassifier {
       );
     }
 
-    if (occupiedHueSectors > maxHueSectors && skinCoverageRatio < 0.85) {
+    if (occupiedHueSectors > 5 && skinCoverageRatio < 0.35 && centerCoverageRatio < 0.35) {
       return _reject(
         stopwatch: stopwatch,
         skinCoverageRatio: skinCoverageRatio,

@@ -1,10 +1,42 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+
+/// Top-level worker function executing in a background isolate to keep UI at 60fps
+Uint8List _isolateCropAndResizeDermatoscope(Uint8List rawBytes) {
+  final img.Image? decoded = img.decodeImage(rawBytes);
+  if (decoded == null) return rawBytes;
+
+  // The circular reticle covers ~74% of the shorter dimension in the center
+  final int minDim = min(decoded.width, decoded.height);
+  final int cropSide = (minDim * 0.74).toInt().clamp(100, minDim);
+  final int cropX = (decoded.width - cropSide) ~/ 2;
+  final int cropY = (decoded.height - cropSide) ~/ 2;
+
+  final img.Image cropped = img.copyCrop(
+    decoded,
+    x: cropX,
+    y: cropY,
+    width: cropSide,
+    height: cropSide,
+  );
+
+  // Resize to standardized clinical 512x512 resolution (fast, crisp, zero memory bloat)
+  final img.Image normalized = img.copyResize(
+    cropped,
+    width: 512,
+    height: 512,
+    interpolation: img.Interpolation.linear,
+  );
+
+  return Uint8List.fromList(img.encodeJpg(normalized, quality: 92));
+}
 
 class DermatoscopeCameraScreen extends StatefulWidget {
   const DermatoscopeCameraScreen({super.key});
@@ -51,7 +83,7 @@ class _DermatoscopeCameraScreenState extends State<DermatoscopeCameraScreen> {
 
       final controller = CameraController(
         backCamera,
-        ResolutionPreset.max,
+        ResolutionPreset.high,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,
       );
@@ -122,34 +154,18 @@ class _DermatoscopeCameraScreenState extends State<DermatoscopeCameraScreen> {
 
     try {
       final XFile photo = await _controller!.takePicture();
-      final bytes = await photo.readAsBytes();
-      final img.Image? decoded = img.decodeImage(bytes);
+      final rawBytes = await photo.readAsBytes();
 
-      if (decoded != null) {
-        // Crop central circular dermatoscope area (square aspect ratio)
-        final int side = min(decoded.width, decoded.height);
-        final int cropX = (decoded.width - side) ~/ 2;
-        final int cropY = (decoded.height - side) ~/ 2;
+      // Process in background isolate so UI thread stays 100% fluid with zero hangup
+      final processedBytes = await Isolate.run(() => _isolateCropAndResizeDermatoscope(rawBytes));
 
-        final img.Image squareCropped = img.copyCrop(
-          decoded,
-          x: cropX,
-          y: cropY,
-          width: side,
-          height: side,
-        );
+      final tempDir = await getTemporaryDirectory();
+      final finalPath = '${tempDir.path}/derm_capture_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final savedFile = File(finalPath);
+      await savedFile.writeAsBytes(processedBytes);
 
-        final tempDir = await getTemporaryDirectory();
-        final finalPath = '${tempDir.path}/derm_capture_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final savedFile = File(finalPath);
-        await savedFile.writeAsBytes(img.encodeJpg(squareCropped, quality: 96));
-
-        if (!mounted) return;
-        Navigator.pop(context, savedFile);
-      } else {
-        if (!mounted) return;
-        Navigator.pop(context, File(photo.path));
-      }
+      if (!mounted) return;
+      Navigator.pop(context, savedFile);
     } catch (e) {
       debugPrint('Photo capture error: $e');
       if (mounted) {
