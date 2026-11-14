@@ -127,6 +127,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final newPwdCtrl = TextEditingController();
     bool isCodeSent = false;
     bool isSubmitting = false;
+    bool isEmailDispatched = false;
+    String? statusErrorMessage;
     String? demoHintCode;
 
     showModalBottomSheet(
@@ -180,6 +182,30 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
 
+              if (statusErrorMessage != null)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFFECACA)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.info_outline_rounded, color: Color(0xFFDC2626), size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          statusErrorMessage!,
+                          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Color(0xFF991B1B)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
               if (!isCodeSent) ...[
                 TextField(
                   controller: emailCtrl,
@@ -205,15 +231,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         ? null
                         : () async {
                             if (emailCtrl.text.trim().isEmpty) return;
-                            setModalState(() => isSubmitting = true);
+                            setModalState(() {
+                              isSubmitting = true;
+                              statusErrorMessage = null;
+                            });
                             final res = await AuthService.forgotPassword(emailCtrl.text.trim());
                             if (!modalCtx.mounted) return;
                             setModalState(() {
                               isSubmitting = false;
-                              isCodeSent = true;
-                              demoHintCode = res.demoCode;
-                              if (res.demoCode != null) {
-                                codeCtrl.text = res.demoCode!;
+                              if (res.success) {
+                                isCodeSent = true;
+                                isEmailDispatched = res.emailSent;
+                                demoHintCode = res.demoCode;
+                                if (res.demoCode != null) {
+                                  codeCtrl.text = res.demoCode!;
+                                }
+                              } else {
+                                statusErrorMessage = res.message;
                               }
                             });
                           },
@@ -223,23 +257,61 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ] else ...[
-                if (demoHintCode != null)
+                if (isEmailDispatched)
                   Container(
                     margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF0FDF4),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: const Color(0xFFBBF7D0)),
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.check_circle_rounded, color: Color(0xFF059669), size: 18),
-                        const SizedBox(width: 8),
+                        const Icon(Icons.mark_email_read_rounded, color: Color(0xFF059669), size: 20),
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            'Demo Code Auto-Filled: $demoHintCode (Dispatched to email)',
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF166534)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('EMAIL DISPATCHED TO INBOX', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF166534))),
+                              const SizedBox(height: 2),
+                              Text(
+                                'A 6-digit security code was delivered to ${emailCtrl.text.trim()}. Please check your inbox and spam folder.',
+                                style: const TextStyle(fontSize: 11, color: Color(0xFF15803D)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (demoHintCode != null)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F9FF),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFBAE6FD)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.shield_outlined, color: Color(0xFF0284C7), size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('TESTING & EVALUATION CODE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF0369A1))),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Live SMTP is unconfigured on server. Your 6-digit OTP code is: $demoHintCode (auto-filled below for instant testing).',
+                                style: const TextStyle(fontSize: 11, color: Color(0xFF0284C7), fontWeight: FontWeight.w500),
+                              ),
+                            ],
                           ),
                         ),
                       ],

@@ -167,7 +167,7 @@ class AuthService {
   }
 
   /// Forgot Password - Request 6-digit OTP
-  static Future<({bool success, String message, String? demoCode})> forgotPassword(String email) async {
+  static Future<({bool success, bool emailSent, String message, String? demoCode})> forgotPassword(String email) async {
     final cleanEmail = email.trim().toLowerCase();
 
     for (final baseUrl in TriageApiClient.candidateBaseUrls) {
@@ -185,17 +185,47 @@ class AuthService {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
           return (
             success: true,
-            message: (data['message'] ?? 'A 6-digit code has been sent.').toString(),
+            emailSent: data['email_sent'] == true,
+            message: (data['message'] ?? 'A 6-digit code has been processed.').toString(),
             demoCode: data['demo_verification_code'] as String?,
           );
+        } else {
+          try {
+            final err = jsonDecode(response.body);
+            final msg = err['detail'] ?? 'Password reset request failed.';
+            return (
+              success: false,
+              emailSent: false,
+              message: msg.toString(),
+              demoCode: null,
+            );
+          } catch (_) {
+            return (
+              success: false,
+              emailSent: false,
+              message: 'Request returned status code ${response.statusCode}.',
+              demoCode: null,
+            );
+          }
         }
       } catch (_) {}
     }
 
+    // Offline / Demo Fallback Mode
+    if (cleanEmail == 'demo@skinguard.ae') {
+      return (
+        success: true,
+        emailSent: false,
+        message: 'Offline Demo Mode: Verification code for demo account is 901991.',
+        demoCode: '901991',
+      );
+    }
+
     return (
-      success: true,
-      message: 'If registered, recovery instructions have been dispatched.',
-      demoCode: '901991', // Fallback demo code
+      success: false,
+      emailSent: false,
+      message: 'Could not connect to health network. Please check connection.',
+      demoCode: null,
     );
   }
 
