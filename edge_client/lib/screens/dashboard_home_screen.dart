@@ -273,122 +273,144 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
               const SizedBox(height: 22),
 
               // 3. Active Closed-Loop Care SLA Tracker Card
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: borderSubtle),
-                  boxShadow: const [
-                    BoxShadow(color: Color(0x06000000), blurRadius: 10, offset: Offset(0, 2)),
-                  ],
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.sync_alt_rounded, color: brandSky, size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              widget.isArabic ? 'متابعة مسار الرعاية المتصلة' : 'CLOSED-LOOP CARE TRACKER',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: textPrimary,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            'Active Stage 3/5',
-                            style: TextStyle(color: brandSky, fontSize: 9.5, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Stepper Progress Row
-                    Row(
-                      children: [
-                        _buildStepIndicator(title: 'Ingested', isDone: true),
-                        _buildStepDivider(isDone: true),
-                        _buildStepIndicator(title: 'Verified', isDone: true),
-                        _buildStepDivider(isDone: true),
-                        _buildStepIndicator(title: 'GP Signed', isDone: true, isCurrent: true),
-                        _buildStepDivider(isDone: false),
-                        _buildStepIndicator(title: 'Handoff', isDone: false),
-                        _buildStepDivider(isDone: false),
-                        _buildStepIndicator(title: 'Closed', isDone: false),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-
-                    // SLA Details
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
+              InkWell(
+                onTap: () => _showClosedLoopDossierModal(context),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderSubtle),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x06000000), blurRadius: 10, offset: Offset(0, 2)),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              const Icon(Icons.sync_alt_rounded, color: brandSky, size: 18),
+                              const SizedBox(width: 8),
                               Text(
-                                widget.isArabic ? 'منسقة الرعاية:' : 'Accountable Navigator:',
-                                style: const TextStyle(fontSize: 10.5, color: textSecondary),
-                              ),
-                              const Text(
-                                'Fatima Al-Mansouri, RN',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: textPrimary),
+                                widget.isArabic ? 'متابعة مسار الرعاية المتصلة' : 'CLOSED-LOOP CARE TRACKER',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: textPrimary,
+                                  letterSpacing: 0.8,
+                                ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                widget.isArabic ? 'المنشأة المعتمدة:' : 'Hospital Referral Partner:',
-                                style: const TextStyle(fontSize: 10.5, color: textSecondary),
-                              ),
-                              const Text(
-                                'Cleveland Clinic Abu Dhabi (2WW)',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: textPrimary),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                widget.isArabic ? 'اتفاقية مستوى الخدمة:' : 'Clinical SLA Target:',
-                                style: const TextStyle(fontSize: 10.5, color: textSecondary),
-                              ),
-                              const Text(
-                                '14-Day Mandatory Biopsy SLA',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: alertUrgent),
-                              ),
-                            ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Row(
+                              children: [
+                                Text(
+                                  'Stage 3/5 Active',
+                                  style: TextStyle(color: brandSky, fontSize: 9.5, fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 4),
+                                Icon(Icons.arrow_forward_ios_rounded, size: 9, color: brandSky),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+
+                      // Stepper Progress Row
+                      Row(
+                        children: [
+                          _buildStepIndicator(title: 'Ingested', isDone: true),
+                          _buildStepDivider(isDone: true),
+                          _buildStepIndicator(title: 'Verified', isDone: true),
+                          _buildStepDivider(isDone: true),
+                          _buildStepIndicator(title: 'GP Signed', isDone: true, isCurrent: true),
+                          _buildStepDivider(isDone: false),
+                          _buildStepIndicator(title: 'Handoff', isDone: false),
+                          _buildStepDivider(isDone: false),
+                          _buildStepIndicator(title: 'Closed', isDone: false),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      // SLA Details
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  widget.isArabic ? 'منسقة الرعاية:' : 'Accountable Navigator:',
+                                  style: const TextStyle(fontSize: 10.5, color: textSecondary),
+                                ),
+                                const Text(
+                                  'Fatima Al-Mansouri, RN',
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: textPrimary),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  widget.isArabic ? 'المنشأة المعتمدة:' : 'Hospital Referral Partner:',
+                                  style: const TextStyle(fontSize: 10.5, color: textSecondary),
+                                ),
+                                const Text(
+                                  'Cleveland Clinic Abu Dhabi (2WW)',
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: textPrimary),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  widget.isArabic ? 'اتفاقية مستوى الخدمة:' : 'Clinical SLA Target:',
+                                  style: const TextStyle(fontSize: 10.5, color: textSecondary),
+                                ),
+                                const Text(
+                                  '14-Day Mandatory Biopsy SLA',
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: alertUrgent),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            widget.isArabic ? 'اضغط لعرض ملف التدقيق ومحاكاة تنبيه صحتنا' : 'Tap to inspect 5-step journey & simulate Sahatna nudge',
+                            style: const TextStyle(fontSize: 10, color: brandSky, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.touch_app_outlined, size: 13, color: brandSky),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 22),
@@ -484,6 +506,62 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                             'sharpness': 26.4,
                             'diagnosis': 'Benign Seborrheic Keratosis (BKL)',
                             'icd10': 'L82.1 Other Seborrheic Keratosis',
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    _buildBenchmarkCard(
+                      title: 'Safety Test 1: Motion Blur',
+                      titleAr: 'اختبار الأمان 1: تشويش الحركة',
+                      badge: 'Gate 1 Optical Guard',
+                      badgeColor: const Color(0xFFDC2626),
+                      tdsScore: 'Pre-Scan Rejection',
+                      diagnosis: 'R68.89 Optical Alert',
+                      imageUrl: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=400&q=80',
+                      onTap: () {
+                        if (widget.onSelectSample != null) {
+                          widget.onSelectSample!({
+                            'name': 'Edge Case 1: Motion Blur & Glare Distortion',
+                            'defaultMalignantProb': 0.0,
+                            'durationDays': 7,
+                            'age': '30-45',
+                            'comorbidity': '',
+                            'asymmetry': 0.0,
+                            'border': 0.0,
+                            'colorVar': 0.0,
+                            'sharpness': 2.1,
+                            'diagnosis': 'REJECTED: Motion blur detected. Score: 2.1 < 6.0 threshold. Please steady device and rescan.',
+                            'icd10': 'R68.89 Clinical Optical Quality Non-Compliant',
+                            'isPreScanFailed': true,
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    _buildBenchmarkCard(
+                      title: 'Safety Test 2: Facial Guard',
+                      titleAr: 'اختبار الأمان 2: حماية الوجه',
+                      badge: 'Gate 4 Facial Triad',
+                      badgeColor: const Color(0xFF6B7280),
+                      tdsScore: 'Cancer Risk: 0.0%',
+                      diagnosis: 'Z00.00 Non-Lesion',
+                      imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+                      onTap: () {
+                        if (widget.onSelectSample != null) {
+                          widget.onSelectSample!({
+                            'name': 'Edge Case 2: Anthropomorphic Face Selfie Rejection',
+                            'defaultMalignantProb': 0.0,
+                            'durationDays': 3,
+                            'age': '18-29',
+                            'comorbidity': '',
+                            'asymmetry': 0.1,
+                            'border': 0.1,
+                            'colorVar': 5.0,
+                            'sharpness': 28.0,
+                            'diagnosis': 'REJECTED: Anthropomorphic facial features detected (eyes/nose/mouth triad). Malignant probability locked to 0.00%.',
+                            'icd10': 'Z00.00 Normal Skin (No Neoplastic Lesion)',
+                            'isPreScanFailed': true,
                           });
                         }
                       },
@@ -749,6 +827,398 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
           IconButton(
             icon: const Icon(Icons.picture_as_pdf_outlined, color: Color(0xFF0284C7), size: 20),
             onPressed: () => PdfExportService.exportAndShareRecord(record, context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClosedLoopDossierModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalCtx) => Container(
+        height: MediaQuery.of(modalCtx).size.height * 0.88,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 20),
+        child: Column(
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFCBD5E1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0284C7).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'ADPHC SCREENING-TO-CARE LOOP',
+                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFF0284C7)),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.verified_rounded, size: 14, color: Color(0xFF0284C7)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Closed-Loop Governance Dossier',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                  onPressed: () => Navigator.pop(modalCtx),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.format_quote_rounded, color: Color(0xFF059669), size: 18),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '"No actionable results should be left without a clear next step." — Miss Hura Hassan, Head of Screening, ADPHC',
+                      style: TextStyle(fontSize: 10.5, fontStyle: FontStyle.italic, color: Color(0xFF166534), fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            Expanded(
+              child: ListView(
+                children: [
+                  // Patient & Registry Header Card
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('PATIENT / CITIZEN PHR', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+                            Text('Malaffi HIE: #AE-MAL-7729', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF0284C7))),
+                          ],
+                        ),
+                        SizedBox(height: 6),
+                        Text('Ahmed Al-Hashemi • 58 yrs • Male (Abu Dhabi Resident)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
+                        SizedBox(height: 2),
+                        Text('Insurance Network: Thiqa / Daman Enhanced (Cleveland Clinic Abu Dhabi In-Network)', style: TextStyle(fontSize: 10.5, color: Color(0xFF475569))),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // The 5-Step Loop Timeline
+                  const Text('5-STAGE SCREENING-TO-CARE AUDIT TRAIL', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF64748B), letterSpacing: 0.8)),
+                  const SizedBox(height: 10),
+
+                  _buildTimelineItem(
+                    stepNum: '1',
+                    title: 'Record in Personal Health Record (Malaffi HIE)',
+                    status: 'COMPLETED • Nov 12, 09:14 GST',
+                    desc: 'Encrypted dermoscopic scan & zero-PII tensor recorded to Malaffi Health Information Exchange.',
+                    isDone: true,
+                    isCurrent: false,
+                  ),
+                  _buildTimelineItem(
+                    stepNum: '2',
+                    title: 'Stratify Risk (NICE NG12 Protocol)',
+                    status: 'COMPLETED • Nov 12, 09:15 GST',
+                    desc: 'Deterministic Stolz TDS 8.17 (Score > 5.45: High Risk Cutaneous Melanoma). Two-Week Wait (2WW) SLA assigned.',
+                    isDone: true,
+                    isCurrent: false,
+                  ),
+                  _buildTimelineItem(
+                    stepNum: '3',
+                    title: 'Initiate Referral to In-Network Care Partner',
+                    status: 'ACTIVE • Hospital Partner Assigned',
+                    desc: 'Primary referral dispatched to Cleveland Clinic Abu Dhabi Dermatology Oncology Clinic (SOP-001).',
+                    isDone: true,
+                    isCurrent: true,
+                  ),
+                  _buildTimelineItem(
+                    stepNum: '4',
+                    title: 'Automated Multi-Channel Patient Reminders',
+                    status: 'IN PROGRESS • Day 3 of 14 SLA',
+                    desc: 'Automated Sahatna push notification & SMS reminders dispatched. Next reminder scheduled in 24 hours.',
+                    isDone: false,
+                    isCurrent: false,
+                  ),
+                  _buildTimelineItem(
+                    stepNum: '5',
+                    title: 'Track Documented Outcome & Audit Sign-Off',
+                    status: 'PENDING BIOPSY • Target: Nov 18, 2026',
+                    desc: 'Mandatory clinical biopsy confirmation. Case Navigator Fatima Al-Mansouri RN assigned to close loop.',
+                    isDone: false,
+                    isCurrent: false,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Interactive Action 1: Simulate Sahatna Citizen Push Notification
+                  SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0284C7),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(modalCtx);
+                        _showSahatnaSimulationBanner(context);
+                      },
+                      icon: const Icon(Icons.notifications_active_rounded, size: 18),
+                      label: const Text('Simulate Sahatna Citizen Push Nudge', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Interactive Action 2: Inspect Malaffi FHIR JSON
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF0F172A),
+                        side: const BorderSide(color: Color(0xFFCBD5E1)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        _showMalaffiFhirDialog(context);
+                      },
+                      icon: const Icon(Icons.code_rounded, size: 18, color: Color(0xFF0284C7)),
+                      label: const Text('Inspect Malaffi FHIR Referral JSON', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSahatnaSimulationBanner(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF0F172A),
+        duration: const Duration(seconds: 6),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        content: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFF0284C7),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.mark_chat_unread_rounded, size: 18, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('صحتنا • SAHATNA HEALTH ALERT', style: TextStyle(color: Color(0xFF38BDF8), fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 0.6)),
+                      Text('Just now', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 9)),
+                    ],
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Urgent 2WW Biopsy Appointment scheduled at Cleveland Clinic Abu Dhabi for Nov 18, 2026. Navigator Nurse Fatima is ready to assist.',
+                    style: TextStyle(color: Colors.white, fontSize: 11, height: 1.35),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMalaffiFhirDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.integration_instructions_rounded, color: Color(0xFF38BDF8), size: 20),
+            SizedBox(width: 8),
+            Text('Malaffi HIE FHIR Bundle', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+          ],
+        ),
+        content: Container(
+          width: double.maxFinite,
+          constraints: const BoxConstraints(maxHeight: 380),
+          child: const SingleChildScrollView(
+            child: Text(
+              '''{
+  "resourceType": "Bundle",
+  "id": "malaffi-referral-7729",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "AE-MAL-7729",
+        "identifier": [{"system": "https://malaffi.ae/doh", "value": "784-1968-1234567-1"}],
+        "active": true
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "code": {"coding": [{"system": "http://snomed.info/sct", "code": "372244006", "display": "Total Dermoscopy Score"}]},
+        "valueQuantity": {"value": 8.17, "unit": "TDS"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "priority": "urgent",
+        "code": {"coding": [{"system": "http://snomed.info/sct", "code": "2WW-DERM", "display": "Two-Week Wait Urgent Biopsy"}]},
+        "performer": {"display": "Cleveland Clinic Abu Dhabi Dermatology"},
+        "note": [{"text": "SOP-001 High Risk Melanoma (ICD-10 C43.9)"}]
+      }
+    }
+  ]
+}''',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 10,
+                color: Color(0xFF38BDF8),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close', style: TextStyle(color: Color(0xFF38BDF8), fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineItem({
+    required String stepNum,
+    required String title,
+    required String status,
+    required String desc,
+    required bool isDone,
+    required bool isCurrent,
+  }) {
+    const brandSky = Color(0xFF0284C7);
+    const alertRoutine = Color(0xFF059669);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDone ? alertRoutine : (isCurrent ? brandSky : const Color(0xFFE2E8F0)),
+                  border: isCurrent ? Border.all(color: brandSky, width: 2) : null,
+                ),
+                child: Center(
+                  child: isDone
+                      ? const Icon(Icons.check, size: 13, color: Colors.white)
+                      : Text(stepNum, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isCurrent ? Colors.white : const Color(0xFF64748B))),
+                ),
+              ),
+              Container(width: 2, height: 38, color: const Color(0xFFE2E8F0)),
+            ],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
+                      ),
+                    ),
+                    Text(
+                      status,
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: isDone ? alertRoutine : (isCurrent ? brandSky : const Color(0xFF64748B)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  desc,
+                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B), height: 1.3),
+                ),
+              ],
+            ),
           ),
         ],
       ),
