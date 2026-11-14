@@ -156,11 +156,10 @@ Generate the structured clinical triage recommendation.
         generation_response = None
         last_gen_err = None
         candidate_gen_models = [
-            "gemini-3.5-flash",
-            "gemini-3.5-flash-lite",
-            "gemini-3.1-flash-lite",
-            "gemini-2.5-flash",
-            "gemini-flash-latest",
+            "gemini-1.5-flash",
+            "gemini-1.5-flash-8b",
+            "gemini-2.0-flash-exp",
+            "gemini-1.5-pro",
         ]
 
         for gen_model_name in candidate_gen_models:
@@ -178,7 +177,7 @@ Generate the structured clinical triage recommendation.
                 generation_response = await asyncio.to_thread(
                     model.generate_content,
                     prompt,
-                    request_options={"timeout": 6.0}
+                    request_options={"timeout": 12.0}
                 )
                 if generation_response and generation_response.text:
                     break
