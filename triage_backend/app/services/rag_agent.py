@@ -156,10 +156,10 @@ Generate the structured clinical triage recommendation.
         generation_response = None
         last_gen_err = None
         candidate_gen_models = [
-            "gemini-flash-latest",
+            "gemini-3.1-flash-lite",
+            "gemini-flash-lite-latest",
+            "gemini-3.5-flash-lite",
             "gemini-3.8-flash",
-            "gemini-2.5-flash",
-            "gemini-1.5-flash",
         ]
 
         for gen_model_name in candidate_gen_models:
