@@ -145,6 +145,38 @@ class TriageApiClient {
     return list;
   }
 
+  /// Fetches dynamic Server-Driven UI Configuration from Render cloud backend.
+  static Future<Map<String, dynamic>?> fetchRemoteConfig() async {
+    for (final baseUrl in candidateBaseUrls) {
+      try {
+        final uri = Uri.parse('$baseUrl/app/config');
+        final res = await http.get(uri).timeout(const Duration(seconds: 3));
+        if (res.statusCode == 200) {
+          return jsonDecode(res.body) as Map<String, dynamic>;
+        }
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  /// Checks for available Over-The-Air app updates from Render cloud backend.
+  static Future<Map<String, dynamic>?> checkForUpdates([String currentVersion = '3.0.0']) async {
+    for (final baseUrl in candidateBaseUrls) {
+      try {
+        final uri = Uri.parse('$baseUrl/app/version');
+        final res = await http.get(uri).timeout(const Duration(seconds: 3));
+        if (res.statusCode == 200) {
+          final data = jsonDecode(res.body) as Map<String, dynamic>;
+          final latest = data['latest_version'] as String? ?? '3.0.0';
+          if (latest != currentVersion) {
+            return data;
+          }
+        }
+      } catch (_) {}
+    }
+    return null;
+  }
+
   /// Pings a host to check live connection status
   static Future<bool> pingServer([String? specificUrl]) async {
     final testUrl = specificUrl ?? (_cachedActiveBaseUrl ?? candidateBaseUrls.first);

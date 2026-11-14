@@ -28,11 +28,29 @@ class DashboardHomeScreen extends StatefulWidget {
 class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   List<SavedScanRecord> _recentRecords = [];
   bool _isLoadingHistory = true;
+  String? _remoteAnnouncement;
+  Map<String, dynamic>? _availableUpdate;
 
   @override
   void initState() {
     super.initState();
     _loadHistory();
+    _loadRemoteConfigAndUpdates();
+  }
+
+  Future<void> _loadRemoteConfigAndUpdates() async {
+    try {
+      final config = await TriageApiClient.fetchRemoteConfig();
+      final update = await TriageApiClient.checkForUpdates('3.0.0');
+      if (mounted) {
+        setState(() {
+          if (config != null && config['announcement_banner']?['enabled'] == true) {
+            _remoteAnnouncement = config['announcement_banner']['message'] as String?;
+          }
+          _availableUpdate = update;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadHistory() async {
@@ -181,7 +199,82 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+
+              // Server-Driven Update or Announcement Banner
+              if (_availableUpdate != null) ...[
+                InkWell(
+                  onTap: () => _showUpdateDialog(context),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0284C7), Color(0xFF0369A1)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [BoxShadow(color: Color(0x1A0284C7), blurRadius: 8, offset: Offset(0, 2))],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.system_update_rounded, size: 18, color: Colors.white),
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.isArabic
+                                      ? 'تحديث متوفر: إصدار ${_availableUpdate!["latest_version"]}'
+                                      : 'New Version Available (${_availableUpdate!["latest_version"]})',
+                                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                                Text(
+                                  widget.isArabic ? 'اضغط لعرض التغييرات وتنزيل التحديث' : 'Tap to inspect changelog & update',
+                                  style: const TextStyle(fontSize: 9.5, color: Color(0xFFBAE6FD)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text('UPDATE', style: TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w900)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ] else if (_remoteAnnouncement != null) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0F9FF),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFBAE6FD)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.bolt_rounded, size: 16, color: brandSky),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _remoteAnnouncement!,
+                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: Color(0xFF0369A1)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
 
               // 2. Hero Action Card (Apple Health Style)
               Container(
@@ -1481,6 +1574,118 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showUpdateDialog(BuildContext context) {
+    if (_availableUpdate == null) return;
+    final version = _availableUpdate!['latest_version'] ?? '3.1.0';
+    final changelog = (_availableUpdate!['changelog'] as List?)?.map((e) => e.toString()).toList() ?? [];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalCtx) => Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: const Color(0xFFCBD5E1), borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: const Color(0xFFE0F2FE), borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.system_update_rounded, color: Color(0xFF0284C7), size: 24),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'SkinGuard UAE Update Available',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
+                    ),
+                    Text(
+                      'Release Version: v$version • Cloud-Hosted on Render',
+                      style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'WHAT IS NEW IN THIS RELEASE:',
+              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 0.6),
+            ),
+            const SizedBox(height: 8),
+            ...changelog.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('✓ ', style: TextStyle(color: Color(0xFF059669), fontWeight: FontWeight.bold)),
+                    Expanded(child: Text(item, style: const TextStyle(fontSize: 11.5, color: Color(0xFF334155)))),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: () => Navigator.pop(modalCtx),
+                    icon: const Icon(Icons.close_rounded, size: 16),
+                    label: const Text('Later', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0284C7),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(modalCtx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Color(0xFF059669),
+                          content: Text('Downloading SkinGuard-Master update from Render cloud...'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.download_rounded, size: 16),
+                    label: const Text('Update Now', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
