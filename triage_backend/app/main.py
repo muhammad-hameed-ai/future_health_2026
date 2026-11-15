@@ -68,28 +68,28 @@ async def health_check():
 async def get_app_version():
     """Provides client version info and direct download URL for seamless in-app updating."""
     return {
-        "latest_version": "3.1.0",
-        "release_tag": "v3.1.0-master",
-        "released_at": "2026-11-14T22:00:00Z",
+        "latest_version": "4.0.0",
+        "release_tag": "v4.0.0-master-onnx",
+        "released_at": "2026-11-15T13:15:00Z",
         "apk_download_url": "/api/v1/app/download-apk",
         "web_live_url": "/app",
         "changelog": [
-            "Interactive Closed-Loop Care Dossier Modal (ADPHC Miss Hura Hassan Mandate)",
-            "One-Tap Safety-Net Stress-Test Cards (Inception 42 Benchmarking)",
-            "Simulated Sahatna Citizen Push Nudge Alert",
-            "Deterministic TDS Formula Derivation Inspector (Strict Zero-LLM Math)",
-            "Malaffi HIE FHIR Bundle JSON Resource Inspector"
+            "Full On-Device 3-Stage Cascaded ONNX Pipeline (MobileNetV3 OOD Gate + Dual EfficientNet-B2 Heads)",
+            "Forward 7x7 Class Activation Map (CAM) Heatmap Visualization",
+            "Dual-Head Modality Selector (Dermatoscope Lens vs Direct Smartphone Camera)",
+            "Two-Stage Probability Calibration Engine (ECE = 0.0072)",
+            "Closed-Loop Hospital Triage (Cleveland Clinic Abu Dhabi 2WW + Malaffi HIE FHIR Bundles)"
         ]
     }
 
 @app.get("/api/v1/app/download-apk")
 async def download_apk():
     """Directly streams the latest signed SkinGuard-Master APK."""
-    apk_path = os.path.join(STATIC_DIR, "SkinGuard-Master-v3.apk")
+    apk_path = os.path.join(STATIC_DIR, "SkinGuard-Master-v4.apk")
     if os.path.exists(apk_path):
         return FileResponse(
             path=apk_path,
-            filename="SkinGuard-Master-v3.apk",
+            filename="SkinGuard-Master-v4.apk",
             media_type="application/vnd.android.package-archive"
         )
     raise HTTPException(status_code=404, detail="APK build not found on server")

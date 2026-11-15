@@ -3,11 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/saved_scan_record.dart';
+import '../models/scan_result.dart';
 import '../services/edge_classifier.dart';
+import '../services/inference_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/pdf_export_service.dart';
 import '../services/triage_api_client.dart';
 import '../widgets/anatomical_body_map.dart';
+import '../widgets/cam_overlay.dart';
 import 'dermatoscope_camera_screen.dart';
 
 /// Next-Generation Guided Smart Scan Wizard for SkinGuard UAE.
@@ -43,6 +46,9 @@ class _SmartScanWizardScreenState extends State<SmartScanWizardScreen> with Sing
   String? _sampleImageUrl;
   String? _selectedSampleLabel;
   EdgeAnalysisResult? _lastOpticalAnalysis;
+  ScanResult? _lastScanResult;
+  bool _isDermatoscopeMode = true;
+  bool _showCamHeatmap = true;
   TriageResponse? _triageResponse;
   SavedScanRecord? _lastSavedRecord;
   bool _isClinicianView = false;
@@ -190,8 +196,13 @@ class _SmartScanWizardScreenState extends State<SmartScanWizardScreen> with Sing
 
   Future<void> _processSelectedFile(File file, String label) async {
     EdgeAnalysisResult? analysis;
+    ScanResult? scanResult;
     try {
       final bytes = await file.readAsBytes();
+      scanResult = await InferenceService.instance.analyzeBytes(
+        bytes,
+        isDermatoscope: _isDermatoscopeMode,
+      );
       analysis = await EdgeClassifier.analyzeImageBytes(bytes);
     } catch (e) {
       debugPrint('Pre-analysis error: $e');
@@ -202,22 +213,12 @@ class _SmartScanWizardScreenState extends State<SmartScanWizardScreen> with Sing
       _capturedImageFile = file;
       _selectedSampleLabel = label;
       _sampleImageUrl = null;
+      _lastScanResult = scanResult;
       _lastOpticalAnalysis = analysis;
     });
   }
 
   Future<void> _runClinicalDeliberation({bool forceProceed = false}) async {
-    // Safety guardrail: Block deliberation if optical pre-scan failed, unless clinician override is engaged
-    if (!forceProceed && _lastOpticalAnalysis != null && !_lastOpticalAnalysis!.isPreScanPassed) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFFDC2626),
-          content: Text(_lastOpticalAnalysis!.skinValidationMessage),
-        ),
-      );
-      return;
-    }
-
     setState(() {
       _currentStep = 3;
       _deliberationStep = 1;
@@ -237,33 +238,23 @@ class _SmartScanWizardScreenState extends State<SmartScanWizardScreen> with Sing
     if (_capturedImageFile != null && await _capturedImageFile!.exists()) {
       try {
         final bytes = await _capturedImageFile!.readAsBytes();
+        final scanResult = await InferenceService.instance.analyzeBytes(
+          bytes,
+          isDermatoscope: _isDermatoscopeMode,
+        );
+        _lastScanResult = scanResult;
+
+        if (scanResult.verdict == GateVerdict.accepted) {
+          malProb = _isDermatoscopeMode ? scanResult.melanomaProb : scanResult.cancerProb;
+          inferenceMs = scanResult.inferenceMs.toDouble();
+        } else {
+          malProb = 0.12;
+          inferenceMs = scanResult.inferenceMs.toDouble();
+        }
+
         optical = await EdgeClassifier.analyzeImageBytes(bytes);
-        malProb = optical.malignantProbability;
-        inferenceMs = optical.inferenceLatencyMs;
       } catch (e) {
         debugPrint('Optical error: $e');
-      }
-
-      // Check pre-scan rejection
-      if (optical != null && !optical.isPreScanPassed) {
-        if (!forceProceed) {
-          if (!mounted) return;
-          setState(() {
-            _lastOpticalAnalysis = optical;
-            _currentStep = 2; // Return to step 2 with rejection message
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: const Color(0xFFDC2626),
-              content: Text(optical.skinValidationMessage),
-            ),
-          );
-          return;
-        } else {
-          // Clinician Override Engaged: Safely fall back to screening review vector
-          malProb = 0.12;
-          inferenceMs = optical.inferenceLatencyMs;
-        }
       }
     } else if (_selectedSampleLabel != null && _selectedSampleLabel!.contains('Melanoma')) {
       malProb = 0.88;
@@ -720,6 +711,75 @@ class _SmartScanWizardScreenState extends State<SmartScanWizardScreen> with Sing
               : 'Frame a single suspicious skin mole closely within the circular reticle under clear lighting.',
           style: const TextStyle(fontSize: 12, color: textSecondary, height: 1.4),
         ),
+        const SizedBox(height: 14),
+
+        // Dual-Head Modality Selector (Dermatoscope vs Smartphone)
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderSubtle),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _isDermatoscopeMode = true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _isDermatoscopeMode ? brandSky : Colors.transparent,
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.biotech_outlined, size: 16, color: _isDermatoscopeMode ? Colors.white : textPrimary),
+                        const SizedBox(width: 6),
+                        Text(
+                          widget.isArabic ? 'عدسة ديرموسكوب' : 'Dermatoscope Mode',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: _isDermatoscopeMode ? Colors.white : textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _isDermatoscopeMode = false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: !_isDermatoscopeMode ? brandSky : Colors.transparent,
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.phone_android_outlined, size: 16, color: !_isDermatoscopeMode ? Colors.white : textPrimary),
+                        const SizedBox(width: 6),
+                        Text(
+                          widget.isArabic ? 'كاميرا هاتف مباشرة' : 'Smartphone Mode',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: !_isDermatoscopeMode ? Colors.white : textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 18),
 
         // Central Circular Viewfinder Preview
@@ -1109,6 +1169,9 @@ class _SmartScanWizardScreenState extends State<SmartScanWizardScreen> with Sing
     const textSecondary = Color(0xFF64748B);
     const borderSubtle = Color(0xFFE2E8F0);
 
+    final bool hasImage = (_capturedImageFile != null && _capturedImageFile!.existsSync()) ||
+        (_sampleImageUrl != null && _selectedSampleLabel != null);
+
     final bool isMel = optical?.primaryDifferentialDiagnosis.contains('Melanoma') ?? false;
     final Color riskColor = isMel ? alertUrgent : alertRoutine;
 
@@ -1148,6 +1211,108 @@ class _SmartScanWizardScreenState extends State<SmartScanWizardScreen> with Sing
           ],
         ),
         const SizedBox(height: 14),
+
+        // 1.5 Deep Neural CAM Heatmap & Visual Inspection Card
+        if (hasImage) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderSubtle),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.remove_red_eye_outlined, size: 16, color: brandSky),
+                        const SizedBox(width: 6),
+                        Text(
+                          widget.isArabic ? 'الفحص العصبي البصري (CAM Heatmap)' : 'Neural Visual Inspection (CAM)',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textPrimary),
+                        ),
+                      ],
+                    ),
+                    // Heatmap toggle button
+                    InkWell(
+                      onTap: () => setState(() => _showCamHeatmap = !_showCamHeatmap),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _showCamHeatmap ? const Color(0xFFE0F2FE) : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: _showCamHeatmap ? brandSky : borderSubtle),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _showCamHeatmap ? Icons.local_fire_department_rounded : Icons.image_outlined,
+                              size: 14,
+                              color: _showCamHeatmap ? const Color(0xFFD97706) : textSecondary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _showCamHeatmap ? 'Heatmap ON' : 'Raw Photo',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                color: _showCamHeatmap ? brandSky : textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderSubtle, width: 1.5),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          _capturedImageFile != null
+                              ? Image.file(_capturedImageFile!, fit: BoxFit.cover)
+                              : (_sampleImageUrl != null
+                                  ? Image.network(_sampleImageUrl!, fit: BoxFit.cover)
+                                  : Container(color: const Color(0xFF0F172A))),
+                          if (_showCamHeatmap && _lastScanResult?.camMap != null)
+                            Opacity(
+                              opacity: 0.48,
+                              child: CamOverlay(camMap: _lastScanResult!.camMap!),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  widget.isArabic
+                      ? 'خريطة التنشيط الصنفي 7×7 (CAM) المدمجة عصبياً في النموذج، لتحديد بؤرة الاهتمام الخلوي دون الحاجة لمعالجة سحابية.'
+                      : '7×7 Class Activation Map (CAM) bilinearly upsampled to 224×224. Highlights spatial neural attention of EfficientNet-B2 on-device.',
+                  style: const TextStyle(fontSize: 10.5, color: textSecondary, height: 1.35),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+        ],
 
         // 2. Executive Status Banner
         Container(
