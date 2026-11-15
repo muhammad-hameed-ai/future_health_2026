@@ -101,14 +101,13 @@ void main() {
     );
 
     await tester.pumpWidget(const SkinGuardEdgeApp());
-    expect(find.text('SkinGuard AI'), findsOneWidget);
-    expect(find.text('2-STEP CLINICAL ARCHITECTURE'), findsOneWidget);
-    expect(find.text('ENTER CLINICAL GATEWAY'), findsOneWidget);
+    expect(find.text('SKINGUARD AI'), findsOneWidget);
+    expect(find.text('TRIAGE HUB'), findsOneWidget);
 
-    // Tap to enter clinical gateway
-    await tester.tap(find.text('ENTER CLINICAL GATEWAY'));
+    // Tap anywhere to transition to clinical gateway
+    await tester.tap(find.text('SKINGUARD AI'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     // Verify executive active tab is Dashboard
     expect(find.text('Dashboard'), findsOneWidget);
