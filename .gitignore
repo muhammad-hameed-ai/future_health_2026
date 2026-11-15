@@ -25,6 +25,7 @@ edge_client/.pub/
 edge_client/android/.gradle/
 edge_client/android/local.properties
 *.apk
+!triage_backend/static/*.apk
 
 # Environment secrets
 .env

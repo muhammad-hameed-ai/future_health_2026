@@ -34,6 +34,10 @@ app.include_router(auth.router)
 if os.path.exists(WEB_DIST_DIR):
     app.mount("/app", StaticFiles(directory=WEB_DIST_DIR, html=True), name="web_app")
 
+# Mount static files (including direct APK downloads)
+if os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 @app.get("/")
 async def root():
     """Root landing endpoint providing clinical gateway operational status and endpoints."""
