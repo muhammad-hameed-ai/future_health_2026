@@ -34,7 +34,7 @@
 > 2. *5 Gates of Safety (Dr. Nance Elanar Directives): Strictly separates deterministic medical math (Stolz ABCD Total Dermoscopy Score and Argenziano 7-Point Checklist) from linguistic summarization. The LLM is mathematically forbidden from computing medical risk. Optical filters reject blurry images, glare, selfies, and non-cutaneous surfaces.*
 > 3. *Zero-PII Federal Privacy: Raw photos and biometric identifiers never leave the device. Only an anonymized mathematical risk vector is transmitted.*
 > 4. *Cloud RAG Clinical Guidance: A live Qdrant vector database retrieves NICE NG12 and Cleveland Clinic oncology guidelines, summarized by Google Gemini 3.1 Flash Lite into structured, patient-friendly bilingual (Arabic/English) recommendations.*
-> 5. *Closed-Loop SLA Tracking: Maps high-risk lesions to a mandatory 14-day Two-Week-Wait (2WW) biopsy SLA at Cleveland Clinic Abu Dhabi, assigns an accountable care navigator (Nurse Fatima Al-Mansouri), and exports HL7 FHIR dossiers compatible with Malaffi and Sahatna."*
+> 5. *Closed-Loop SLA Tracking: Maps high-risk lesions to a mandatory 14-day Two-Week-Wait (2WW) biopsy SLA at Cleveland Clinic Abu Dhabi, establishes an accountable care navigation tracking protocol, and exports HL7 FHIR dossiers compatible with Malaffi and Sahatna."*
 
 ---
 

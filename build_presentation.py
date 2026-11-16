@@ -159,7 +159,7 @@ def create_presentation():
     tf = tb.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
-    p.text = "• Team Name: SkinGuard AI (Team SkinGuard UAE)\n• Team Size: 1 (Lead AI & Edge Systems Architect + Advisory Network)\n• Target Category: Population Health — Closing the Screening-to-Care Loop\n• Alignment: Abu Dhabi Public Health Center (ADPHC) & Sahatna"
+    p.text = "• Team Name: SkinGuard AI\n• Team Size: 1 (Solo AI Architect & Full-Stack Systems Engineer)\n• Target Category: Population Health — Closing the Screening-to-Care Loop\n• Alignment: Abu Dhabi Public Health Center (ADPHC) & Sahatna"
     p.font.size = Pt(12.5)
     p.font.color.rgb = COLOR_TEXT_BODY
 
@@ -215,10 +215,10 @@ def create_presentation():
         p.font.color.rgb = COLOR_TEXT_TITLE
 
     members_data = [
-        ("1", "Muhammad Hameed", "Pakistan / UAE", "Lead AI Architect & Full-Stack Systems Engineer", "SkinGuard AI Initiative", "Confirmed (Adult, 24+)"),
-        ("2", "Dr. Tariq Al-Hashimi, MD", "United Arab Emirates", "Clinical Oncology & Triage Advisor", "Healthcare Advisory Network", "Confirmed (Adult, 30+)"),
-        ("3", "Fatima Al-Mansouri, RN", "United Arab Emirates", "Care Navigation & Clinical Protocol Consultant", "Ambulatory & Triage Nursing", "Confirmed (Adult, 28+)"),
-        ("4", "Institutional Mentorship", "UAE / Global", "ADPHC, Microsoft & Inception 42 Guidelines", "Future Health Challenge 2026", "N/A")
+        ("1", "Muhammad Hameed", "Pakistan", "Sole Creator, Lead AI Architect & Full-Stack Systems Engineer", "SkinGuard AI / Independent Innovator", "Confirmed (Adult, 18+)"),
+        ("2", "—", "—", "— (Solo Submission)", "—", "—"),
+        ("3", "—", "—", "— (Solo Submission)", "—", "—"),
+        ("4", "—", "—", "— (Solo Submission)", "—", "—")
     ]
 
     for r_idx, row in enumerate(members_data):
@@ -231,12 +231,12 @@ def create_presentation():
             if r_idx == 0:
                 p.font.bold = True
 
-    add_card(s3, 0.8, 5.3, 11.7, 1.8, "TEAM GOVERNANCE & EXECUTION ROBUSTNESS")
+    add_card(s3, 0.8, 5.3, 11.7, 1.8, "SOLO CREATOR EXECUTION & AUTHENTICITY")
     tb = s3.shapes.add_textbox(Inches(1.0), Inches(5.8), Inches(11.3), Inches(1.1))
     tf = tb.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
-    p.text = "• Autonomous Full-Stack Execution: The core AI model training, ONNX Runtime compilation, Flutter edge mobile client, FastAPI cloud RAG backend, and Malaffi FHIR interoperability pipelines were engineered 100% end-to-end by Muhammad Hameed.\n• Clinical Grounding: Triage pathways and deterministic threshold logic strictly mirror Abu Dhabi Public Health Center standards and NICE NG12 clinical oncology guidelines."
+    p.text = "• 100% Solo Engineering Ownership: Muhammad Hameed independently conceptualized, programmed, trained, and deployed the entire end-to-end SkinGuard AI solution—including on-device ONNX Runtime inference, dual-head EfficientNet-B2 models, Flutter client, FastAPI cloud RAG backend, and 21 automated test suites.\n• Clinical Protocol Grounding: Medical triage pathways strictly implement published peer-reviewed dermatological standards (Stolz ABCD, Argenziano 7-Point, NICE NG12) and Abu Dhabi Public Health Center directives."
     p.font.size = Pt(12)
     p.font.color.rgb = COLOR_TEXT_BODY
 
@@ -259,9 +259,9 @@ def create_presentation():
         "AUC 0.9493), out-of-distribution neural gating (MobileNetV3), and 200-point isotonic calibration curves "
         "(ECE 0.0072). His engineering spans cross-platform Flutter client engineering, high-throughput "
         "asynchronous backend systems (FastAPI, Python), and clinical RAG retrieval pipelines using Qdrant "
-        "Vector DB and Google Gemini. Supported by clinical oncological guidance, the team possesses the complete "
-        "capability to design, train, deploy, and scale high-security, regulatory-grade digital health platforms "
-        "compliant with UAE Federal Health Data Laws and Malaffi HIE standards."
+        "Vector DB and Google Gemini. He possesses the complete capability to design, train, deploy, and scale "
+        "high-security, regulatory-grade digital health platforms compliant with UAE Federal Health Data Laws "
+        "and Malaffi HIE standards."
     )
     p = tf.paragraphs[0]
     p.text = cap_text
@@ -326,7 +326,7 @@ def create_presentation():
     tf = tb.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
-    p.text = "Malaffi HIE & Sahatna Loop\n\n• Stage 1: Ingested\n• Stage 2: Verified\n• Stage 3: GP Signed (Gate 5)\n• Stage 4: 14-Day 2WW Slot at Cleveland Clinic Abu Dhabi\n• Stage 5: Biopsy Follow-up\n\nAccountable Navigator: Nurse Fatima Al-Mansouri"
+    p.text = "Malaffi HIE & Sahatna Loop\n\n• Stage 1: Ingested\n• Stage 2: Verified\n• Stage 3: GP Signed (Gate 5)\n• Stage 4: 14-Day 2WW Slot at Cleveland Clinic Abu Dhabi\n• Stage 5: Biopsy Follow-up\n\nAccountable Care Navigator Model"
     p.font.size = Pt(11)
     p.font.color.rgb = COLOR_TEXT_BODY
 
@@ -553,7 +553,7 @@ def create_presentation():
     tf = tb.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
-    p.text = "If manual login is preferred, use these credentials:\n\n• Role: Clinician Care Navigator (ADPHC)\n• Email: demo@skinguard.ae\n• Password: DemoAccess2026!\n• Clinician Name: Nurse Fatima Al-Mansouri, RN\n\nLive Web Gateway URL:\nhttps://future-health-2026.onrender.com\n\nAndroid Release APK Direct Download:\nhttps://future-health-2026.onrender.com/static/SkinGuard-Master-v4.apk"
+    p.text = "If manual login is preferred, use these credentials:\n\n• Role: Clinician Care Navigator (Demo Account)\n• Email: demo@skinguard.ae\n• Password: DemoAccess2026!\n• Profile Name: Evaluator Demo Clinician\n\nLive Web Gateway URL:\nhttps://future-health-2026.onrender.com\n\nAndroid Release APK Direct Download:\nhttps://future-health-2026.onrender.com/static/SkinGuard-Master-v4.apk"
     p.font.size = Pt(12)
     p.font.color.rgb = COLOR_TEXT_BODY
 
@@ -718,8 +718,8 @@ def create_presentation():
     p4.font.color.rgb = COLOR_TEXT_TITLE
 
     # Save presentation
-    out_path = r'c:\Users\hameed\future_health_2026\SkinGuard_AI_Future_Health_Presentation.pptx'
-    static_path = r'c:\Users\hameed\future_health_2026\triage_backend\static\SkinGuard_AI_Future_Health_Presentation.pptx'
+    out_path = r'c:\Users\hameed\future_health_2026\SkinGuard_Future_Health_Official_Deck.pptx'
+    static_path = r'c:\Users\hameed\future_health_2026\triage_backend\static\SkinGuard_Future_Health_Official_Deck.pptx'
     prs.save(out_path)
     prs.save(static_path)
     print(f'Successfully created presentation at {out_path} and {static_path}')
