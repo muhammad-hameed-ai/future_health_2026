@@ -4,17 +4,38 @@ import 'services/triage_api_client.dart';
 import 'services/auth_service.dart';
 import 'services/inference_service.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await TriageApiClient.initSavedHost();
-  await AuthService.initAuth();
+
+  // Launch the UI immediately on frame 1 — eliminating any startup delay or black screen
+  runApp(const SkinGuardEdgeApp());
+
+  // Initialize network and pre-warm neural inference engines asynchronously in background
+  _initializeBackgroundServices();
+}
+
+void _initializeBackgroundServices() async {
   try {
-    await InferenceService.instance.initialize();
+    await TriageApiClient.initSavedHost();
+  } catch (e) {
+    debugPrint('Host init notice: $e');
+  }
+
+  try {
+    await AuthService.initAuth();
+  } catch (e) {
+    debugPrint('Auth init notice: $e');
+  }
+
+  try {
+    if (!InferenceService.instance.isInitialized) {
+      await InferenceService.instance.initialize();
+    }
     await InferenceService.instance.warmUp();
+    debugPrint('Inference engine pre-warmed successfully in background.');
   } catch (e) {
     debugPrint('Inference engine pre-warm notice: $e');
   }
-  runApp(const SkinGuardEdgeApp());
 }
 
 class SkinGuardEdgeApp extends StatelessWidget {

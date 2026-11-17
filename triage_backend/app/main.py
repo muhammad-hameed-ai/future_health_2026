@@ -1,6 +1,8 @@
 import os
 import asyncio
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -26,6 +28,34 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Formats validation errors into clean, patient-friendly human readable messages."""
+    errors = exc.errors()
+    if errors:
+        first_err = errors[0]
+        field_loc = first_err.get("loc", [""])[-1]
+        field_name = str(field_loc).replace("_", " ").capitalize()
+        err_type = first_err.get("type", "")
+        
+        if "string_too_short" in err_type:
+            min_len = first_err.get("ctx", {}).get("min_length", 6)
+            clean_message = f"{field_name} must be at least {min_len} characters long."
+        elif "string_too_long" in err_type:
+            max_len = first_err.get("ctx", {}).get("max_length", 128)
+            clean_message = f"{field_name} cannot exceed {max_len} characters."
+        elif "missing" in err_type:
+            clean_message = f"{field_name} is required."
+        else:
+            clean_message = first_err.get("msg", "Invalid input format.")
+    else:
+        clean_message = "Validation error. Please verify your input."
+        
+    return JSONResponse(
+        status_code=422,
+        content={"detail": clean_message}
+    )
 
 # Include Authentication & Profile Management Router
 app.include_router(auth.router)

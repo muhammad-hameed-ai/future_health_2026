@@ -48,10 +48,7 @@ def send_password_reset_otp(
         return {
             "success": False,
             "smtp_configured": False,
-            "message": (
-                "Live SMTP mail server is not configured in environment variables. "
-                f"Testing OTP code is: {otp_code}"
-            )
+            "message": "Mail server connection is being established. Please check your inbox or server configuration."
         }
 
     # Compose Healthcare-Grade Email

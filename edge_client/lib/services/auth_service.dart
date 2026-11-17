@@ -14,6 +14,32 @@ class AuthService {
   static UserProfile? get currentUser => currentUserNotifier.value;
   static bool get isAuthenticated => currentUserNotifier.value != null;
 
+  static String _extractErrorMessage(dynamic detail) {
+    if (detail == null) return 'An error occurred. Please try again.';
+    if (detail is String) return detail;
+    if (detail is List && detail.isNotEmpty) {
+      final first = detail.first;
+      if (first is Map) {
+        final loc = first['loc'];
+        final field = (loc is List && loc.isNotEmpty)
+            ? loc.last.toString().replaceAll('_', ' ')
+            : 'Input';
+        if (first['type'] == 'string_too_short') {
+          final min = first['ctx']?['min_length'] ?? 6;
+          return '$field must be at least $min characters long.';
+        }
+        return first['msg']?.toString() ?? 'Validation error.';
+      }
+      return first.toString();
+    }
+    if (detail is Map) {
+      return detail['message']?.toString() ??
+          detail['msg']?.toString() ??
+          detail.toString();
+    }
+    return detail.toString();
+  }
+
   /// Initializes persisted session from local device storage
   static Future<void> initAuth() async {
     try {
@@ -88,8 +114,8 @@ class AuthService {
           return (success: true, message: 'Welcome back, ${profile.fullName}!');
         } else {
           final err = jsonDecode(response.body);
-          final msg = err['detail'] ?? 'Login failed. Please check credentials.';
-          return (success: false, message: msg.toString());
+          final msg = _extractErrorMessage(err['detail'] ?? 'Login failed. Please check credentials.');
+          return (success: false, message: msg);
         }
       } catch (_) {}
     }
@@ -157,8 +183,8 @@ class AuthService {
           return (success: true, message: 'Account successfully registered!');
         } else {
           final err = jsonDecode(response.body);
-          final msg = err['detail'] ?? 'Registration failed.';
-          return (success: false, message: msg.toString());
+          final msg = _extractErrorMessage(err['detail'] ?? 'Registration failed.');
+          return (success: false, message: msg);
         }
       } catch (_) {}
     }
@@ -192,11 +218,11 @@ class AuthService {
         } else {
           try {
             final err = jsonDecode(response.body);
-            final msg = err['detail'] ?? 'Password reset request failed.';
+            final msg = _extractErrorMessage(err['detail'] ?? 'Password reset request failed.');
             return (
               success: false,
               emailSent: false,
-              message: msg.toString(),
+              message: msg,
               demoCode: null,
             );
           } catch (_) {
@@ -256,7 +282,8 @@ class AuthService {
           return (success: true, message: 'Password reset successfully! Please sign in.');
         } else {
           final err = jsonDecode(response.body);
-          return (success: false, message: (err['detail'] ?? 'Invalid code.').toString());
+          final msg = _extractErrorMessage(err['detail'] ?? 'Invalid code.');
+          return (success: false, message: msg);
         }
       } catch (_) {}
     }

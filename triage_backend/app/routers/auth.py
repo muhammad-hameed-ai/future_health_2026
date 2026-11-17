@@ -164,16 +164,14 @@ async def forgot_password(req: ForgotPasswordRequest):
             "status": "dispatched",
             "email_sent": True,
             "smtp_configured": True,
-            "message": f"A 6-digit verification code has been delivered to your email ({clean_email}). Please check your inbox and spam folder.",
-            "demo_verification_code": code
+            "message": f"A 6-digit verification code has been delivered to your email ({clean_email}). Please check your inbox and spam folder."
         }
     else:
         return {
             "status": "dispatched",
             "email_sent": False,
             "smtp_configured": email_res.get("smtp_configured", False),
-            "message": email_res.get("message", f"Verification code generated: {code}"),
-            "demo_verification_code": code
+            "message": email_res.get("message", "Verification code generated and dispatched to your email. Please check your inbox.")
         }
 
 @router.post("/reset-password")

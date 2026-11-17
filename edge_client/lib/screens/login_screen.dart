@@ -127,9 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final newPwdCtrl = TextEditingController();
     bool isCodeSent = false;
     bool isSubmitting = false;
-    bool isEmailDispatched = false;
     String? statusErrorMessage;
-    String? demoHintCode;
 
     showModalBottomSheet(
       context: context,
@@ -241,11 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               isSubmitting = false;
                               if (res.success) {
                                 isCodeSent = true;
-                                isEmailDispatched = res.emailSent;
-                                demoHintCode = res.demoCode;
-                                if (res.demoCode != null) {
-                                  codeCtrl.text = res.demoCode!;
-                                }
+                                statusErrorMessage = null;
                               } else {
                                 statusErrorMessage = res.message;
                               }
@@ -257,72 +251,42 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ] else ...[
-                if (isEmailDispatched)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0FDF4),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFBBF7D0)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.mark_email_read_rounded, color: Color(0xFF059669), size: 20),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('EMAIL DISPATCHED TO INBOX', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF166534))),
-                              const SizedBox(height: 2),
-                              Text(
-                                'A 6-digit security code was delivered to ${emailCtrl.text.trim()}. Please check your inbox and spam folder.',
-                                style: const TextStyle(fontSize: 11, color: Color(0xFF15803D)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else if (demoHintCode != null)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F9FF),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFBAE6FD)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.shield_outlined, color: Color(0xFF0284C7), size: 20),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('TESTING & EVALUATION CODE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF0369A1))),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Live SMTP is unconfigured on server. Your 6-digit OTP code is: $demoHintCode (auto-filled below for instant testing).',
-                                style: const TextStyle(fontSize: 11, color: Color(0xFF0284C7), fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFBBF7D0)),
                   ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.mark_email_read_rounded, color: Color(0xFF059669), size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('SECURITY CODE DISPATCHED', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF166534))),
+                            const SizedBox(height: 2),
+                            Text(
+                              'A 6-digit verification code was dispatched to ${emailCtrl.text.trim()}. Please check your email inbox and enter the code below.',
+                              style: const TextStyle(fontSize: 11, color: Color(0xFF15803D)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 TextField(
                   controller: codeCtrl,
                   keyboardType: TextInputType.number,
                   maxLength: 6,
                   decoration: InputDecoration(
                     labelText: '6-Digit Verification Code',
+                    hintText: 'Enter code from email',
                     prefixIcon: const Icon(Icons.pin_outlined, size: 18, color: Color(0xFF0284C7)),
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
@@ -334,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: newPwdCtrl,
                   obscureText: true,
                   decoration: InputDecoration(
-                    labelText: 'Set New Password',
+                    labelText: 'Set New Password (min. 6 chars)',
                     prefixIcon: const Icon(Icons.lock_outline_rounded, size: 18, color: Color(0xFF0284C7)),
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
@@ -353,18 +317,34 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: isSubmitting
                         ? null
                         : () async {
-                            if (codeCtrl.text.trim().isEmpty || newPwdCtrl.text.isEmpty) return;
-                            setModalState(() => isSubmitting = true);
+                            final code = codeCtrl.text.trim();
+                            final newPwd = newPwdCtrl.text;
+                            if (code.length != 6) {
+                              setModalState(() {
+                                statusErrorMessage = 'Please enter the complete 6-digit verification code from your email.';
+                              });
+                              return;
+                            }
+                            if (newPwd.length < 6) {
+                              setModalState(() {
+                                statusErrorMessage = 'New password must be at least 6 characters long.';
+                              });
+                              return;
+                            }
+                            setModalState(() {
+                              isSubmitting = true;
+                              statusErrorMessage = null;
+                            });
                             final res = await AuthService.resetPassword(
                               email: emailCtrl.text.trim(),
-                              code: codeCtrl.text.trim(),
-                              newPassword: newPwdCtrl.text,
+                              code: code,
+                              newPassword: newPwd,
                             );
                             if (!modalCtx.mounted) return;
                             setModalState(() => isSubmitting = false);
                             if (res.success) {
                               Navigator.pop(modalCtx);
-                              _passwordController.text = newPwdCtrl.text;
+                              _passwordController.text = newPwd;
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
