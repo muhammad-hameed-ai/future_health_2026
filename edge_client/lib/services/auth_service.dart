@@ -121,7 +121,7 @@ class AuthService {
     }
 
     // Offline / Demo Fallback Mode (Ensures zero judge blockage)
-    if (cleanEmail == 'demo@skinguard.ae' && password == 'AbuDhabi2026!') {
+    if (cleanEmail == 'demo@skinguard.ae' && (password == 'AbuDhabi2026!' || password == 'DemoAccess2026!')) {
       final demoUser = UserProfile(
         id: 'demo-clinician-7729',
         fullName: 'Fatima Al-Mansouri, RN',
