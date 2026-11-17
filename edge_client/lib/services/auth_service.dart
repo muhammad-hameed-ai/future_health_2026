@@ -91,7 +91,7 @@ class AuthService {
                 'remember_me': rememberMe,
               }),
             )
-            .timeout(const Duration(seconds: 4));
+            .timeout(const Duration(seconds: 15));
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -162,7 +162,7 @@ class AuthService {
                 'role': role,
               }),
             )
-            .timeout(const Duration(seconds: 4));
+            .timeout(const Duration(seconds: 15));
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -205,7 +205,7 @@ class AuthService {
               headers: {'Content-Type': 'application/json'},
               body: jsonEncode({'email': cleanEmail}),
             )
-            .timeout(const Duration(seconds: 4));
+            .timeout(const Duration(seconds: 15));
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -276,7 +276,7 @@ class AuthService {
                 'new_password': newPassword,
               }),
             )
-            .timeout(const Duration(seconds: 4));
+            .timeout(const Duration(seconds: 15));
 
         if (response.statusCode == 200) {
           return (success: true, message: 'Password reset successfully! Please sign in.');

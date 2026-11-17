@@ -152,7 +152,7 @@ async def forgot_password(req: ForgotPasswordRequest):
     if not code:
         raise HTTPException(status_code=500, detail="Failed to generate verification code.")
 
-    # Dispatch real email via SMTP
+    # Dispatch real email via HTTPS Email API or SMTP
     email_res = email_service.send_password_reset_otp(
         to_email=clean_email,
         otp_code=code,
@@ -163,16 +163,14 @@ async def forgot_password(req: ForgotPasswordRequest):
         return {
             "status": "dispatched",
             "email_sent": True,
-            "smtp_configured": True,
             "message": f"A 6-digit verification code has been delivered to your email ({clean_email}). Please check your inbox and spam folder."
         }
     else:
-        return {
-            "status": "dispatched",
-            "email_sent": False,
-            "smtp_configured": email_res.get("smtp_configured", False),
-            "message": email_res.get("message", "Verification code generated and dispatched to your email. Please check your inbox.")
-        }
+        # Outbound delivery failed: explain clearly so user/admin knows what to configure
+        raise HTTPException(
+            status_code=502,
+            detail=email_res.get("message", "Unable to deliver verification code to your email. Please contact administrator.")
+        )
 
 @router.post("/reset-password")
 async def reset_password(req: ResetPasswordRequest):
