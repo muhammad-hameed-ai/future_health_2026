@@ -21,14 +21,21 @@ import httpx
 logger = logging.getLogger("skinguard.email_service")
 
 # HTTP-based Email API Keys (Port 443 HTTPS - NEVER blocked by Render or cloud firewalls)
-RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()
+RESEND_API_KEY = (
+    os.getenv("RESEND_API_KEY")
+    or os.getenv("SkinGuard")
+    or os.getenv("SKINGUARD")
+    or os.getenv("skinguard")
+    or os.getenv("RESEND_KEY")
+    or ""
+).strip()
 RESEND_FROM = os.getenv("RESEND_FROM", "SkinGuard UAE <onboarding@resend.dev>").strip()
 
-BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
+BREVO_API_KEY = (os.getenv("BREVO_API_KEY") or os.getenv("BREVO_KEY") or "").strip()
 BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL", "eng.hameed2943@gmail.com").strip()
 BREVO_SENDER_NAME = os.getenv("BREVO_SENDER_NAME", "SkinGuard UAE").strip()
 
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "").strip()
+SENDGRID_API_KEY = (os.getenv("SENDGRID_API_KEY") or os.getenv("SENDGRID_KEY") or "").strip()
 SENDGRID_FROM = os.getenv("SENDGRID_FROM", "eng.hameed2943@gmail.com").strip()
 
 # Traditional SMTP Configuration (Blocked on Render Free Tier via ports 25, 465, 587)
@@ -147,10 +154,19 @@ def _send_via_resend(clean_email: str, otp_code: str, name: str, text_content: s
             }
         else:
             logger.error(f"[Resend Error] {resp.status_code}: {resp.text}")
+            error_msg = resp.text
+            try:
+                err_json = resp.json()
+                if resp.status_code == 401:
+                    error_msg = "Resend rejected the API key (401 Invalid Key). In Resend dashboard, please verify your email address and generate a new Full Access API key."
+                else:
+                    error_msg = f"Resend API error ({resp.status_code}): {err_json.get('message', resp.text)}"
+            except Exception:
+                pass
             return {
                 "success": False,
                 "provider": "resend",
-                "message": f"Resend API error: {resp.text}"
+                "message": error_msg
             }
 
 
@@ -292,17 +308,27 @@ def send_password_reset_otp(
         res = _send_via_resend(clean_email, otp_code, name, text_content, html_content)
         if res.get("success"):
             return res
+        logger.error(f"[Resend Dispatch Failed] {res.get('message')}")
+        # Return Resend's exact error if no other provider is configured
+        if not (BREVO_API_KEY or SENDGRID_API_KEY or (SMTP_HOST and SMTP_USER and SMTP_PASS)):
+            return res
 
     # 2. Brevo (HTTP Port 443)
     if BREVO_API_KEY:
         res = _send_via_brevo(clean_email, otp_code, name, text_content, html_content)
         if res.get("success"):
             return res
+        logger.error(f"[Brevo Dispatch Failed] {res.get('message')}")
+        if not (SENDGRID_API_KEY or (SMTP_HOST and SMTP_USER and SMTP_PASS)):
+            return res
 
     # 3. SendGrid (HTTP Port 443)
     if SENDGRID_API_KEY:
         res = _send_via_sendgrid(clean_email, otp_code, name, text_content, html_content)
         if res.get("success"):
+            return res
+        logger.error(f"[SendGrid Dispatch Failed] {res.get('message')}")
+        if not (SMTP_HOST and SMTP_USER and SMTP_PASS):
             return res
 
     # 4. Standard SMTP (Port 587 / 465)
