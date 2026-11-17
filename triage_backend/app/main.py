@@ -38,6 +38,14 @@ if os.path.exists(WEB_DIST_DIR):
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+@app.get("/welcome")
+async def welcome_page():
+    """Serves the official UAE Digital Health welcome gateway."""
+    welcome_path = os.path.join(STATIC_DIR, "welcome.html")
+    if os.path.exists(welcome_path):
+        return FileResponse(welcome_path, media_type="text/html")
+    return FileResponse(os.path.join(WEB_DIST_DIR, "index.html"))
+
 @app.get("/")
 async def root():
     """Root landing endpoint providing clinical gateway operational status and endpoints."""

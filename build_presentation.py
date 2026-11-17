@@ -252,16 +252,16 @@ def create_presentation():
     tf.word_wrap = True
     
     cap_text = (
-        "Muhammad Hameed is a specialized Artificial Intelligence and Full-Stack Systems Engineer with deep "
-        "expertise in on-device deep learning (ONNX Runtime, Edge AI optimization), medical computer vision, "
-        "and zero-PII healthcare architectures. He has architected end-to-end clinical systems integrating "
-        "multi-head convolutional neural networks (EfficientNet-B2 dermoscopy & smartphone classifiers with "
-        "AUC 0.9493), out-of-distribution neural gating (MobileNetV3), and 200-point isotonic calibration curves "
-        "(ECE 0.0072). His engineering spans cross-platform Flutter client engineering, high-throughput "
-        "asynchronous backend systems (FastAPI, Python), and clinical RAG retrieval pipelines using Qdrant "
-        "Vector DB and Google Gemini. He possesses the complete capability to design, train, deploy, and scale "
-        "high-security, regulatory-grade digital health platforms compliant with UAE Federal Health Data Laws "
-        "and Malaffi HIE standards."
+        "Muhammad Hameed is an award-winning Software Engineering graduate (CECOS University) and specialized "
+        "AI/ML Systems Engineer with verified expertise delivering production-grade on-device computer vision "
+        "and clinical RAG platforms. Certified by AWS, Google, and NASA, he is the sole architect of SkinGuard AI "
+        "(ICHARMM award-winning, HEC-registered research). He has proven mastery across the full medical AI "
+        "lifecycle: resolving the dermoscopy-to-smartphone domain gap (recovering AUC from 0.49 to 0.78), "
+        "reducing calibration error 31× (0.2235 to 0.0072 ECE), and deploying an on-device MobileNetV3 OOD "
+        "gate at 99.41% accuracy via ONNX Runtime C++. His engineering spans cross-platform mobile development, "
+        "high-throughput FastAPI backends, and Qdrant-Gemini RAG pipelines with CI-gated test automation. "
+        "His architecture strictly enforces deterministic medical safety gates and HL7 FHIR standards designed "
+        "for Abu Dhabi’s Sahatna mobile app and Malaffi health information exchange."
     )
     p = tf.paragraphs[0]
     p.text = cap_text
@@ -717,9 +717,9 @@ def create_presentation():
     p4.font.size = Pt(13)
     p4.font.color.rgb = COLOR_TEXT_TITLE
 
-    # Save presentation
-    out_path = r'c:\Users\hameed\future_health_2026\SkinGuard_Future_Health_Official_Deck.pptx'
-    static_path = r'c:\Users\hameed\future_health_2026\triage_backend\static\SkinGuard_Future_Health_Official_Deck.pptx'
+    # Save presentation with fallback if open in PowerPoint
+    out_path = r'c:\Users\hameed\future_health_2026\SkinGuard_Future_Health_Official_Deck_v2.pptx'
+    static_path = r'c:\Users\hameed\future_health_2026\triage_backend\static\SkinGuard_Future_Health_Official_Deck_v2.pptx'
     prs.save(out_path)
     prs.save(static_path)
     print(f'Successfully created presentation at {out_path} and {static_path}')

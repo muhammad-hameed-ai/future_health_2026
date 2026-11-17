@@ -30,3 +30,8 @@ edge_client/android/local.properties
 # Environment secrets
 .env
 
+
+# Temporary debug diffs
+diff*.png
+card2_text.png
+test_diag.png

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>SkinGuard AI — UAE Digital Health Welcome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-white: #FFFFFF;
+      --dark-green: #092F34;
+      --brand-teal: #08766F;
+      --button-teal: #075A5A;
+      --button-hover: #064E4E;
+      --muted-grey: #52796F;
+      --border-mint: #D1E7DD;
+      --light-mint-glow: rgba(8, 118, 111, 0.05);
+      --uae-red: #EF3340;
+      --uae-green: #159657;
+      --uae-white: #FFFFFF;
+      --uae-black: #171B1B;
+      --ease-out-cubic: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-white);
+      color: var(--dark-green);
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+    }
+
+    /* RTL Arabic Typography */
+    html[dir="rtl"] body {
+      font-family: 'Noto Sans Arabic', 'Manrope', sans-serif;
+    }
+
+    /* App Container: Optimized for 280-420px mobile viewport, contained on desktop */
+    .app-viewport {
+      width: 100%;
+      max-width: 410px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      background: #FFFFFF;
+    }
+
+    /* ==========================================================================
+       A. TOP HEADER
+       ========================================================================== */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #FFFFFF;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      z-index: 20;
+      animation: fadeInDown 0.65s var(--ease-out-cubic) forwards;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .brand-shield-svg {
+      width: 24px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: var(--dark-green);
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      color: var(--muted-grey);
+      line-height: 1.1;
+    }
+
+    /* Language Switcher */
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-mint);
+      border-radius: 20px;
+      padding: 5px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-teal);
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .lang-toggle:hover {
+      background: #F8FAF9;
+      border-color: #A3D4C7;
+    }
+
+    .lang-toggle:active {
+      transform: scale(0.96);
+    }
+
+    .lang-icon {
+      width: 14px;
+      height: 14px;
+      stroke: var(--brand-teal);
+      stroke-width: 1.8;
+      fill: none;
+    }
+
+    /* ==========================================================================
+       B. MAIN CONTENT
+       ========================================================================== */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      align-items: center;
+      padding: 10px 24px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    /* UAE Digital Health Tag */
+    .uae-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      animation: fadeInUp 0.7s var(--ease-out-cubic) 0.1s both;
+    }
+
+    .mini-flag-canvas {
+      width: 22px;
+      height: 13px;
+      border-radius: 1.5px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .uae-tag-text {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.0px;
+      color: var(--muted-grey);
+      text-transform: uppercase;
+    }
+
+    /* Headline */
+    .headline-wrap {
+      animation: fadeInUp 0.75s var(--ease-out-cubic) 0.15s both;
+    }
+
+    .headline-line1 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.6px;
+      color: var(--dark-green);
+      line-height: 1.18;
+    }
+
+    .headline-line2 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      color: var(--brand-teal);
+      line-height: 1.18;
+    }
+
+    /* Supporting Copy */
+    .supporting-copy {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted-grey);
+      line-height: 1.35;
+      margin-top: 6px;
+      animation: fadeInUp 0.75s var(--ease-out-cubic) 0.25s both;
+    }
+
+    /* ==========================================================================
+       C. CENTRAL CLINICAL SEAL (IDENTITY FIELD)
+       ========================================================================== */
+    .seal-stage {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      margin: 8px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: scaleFadeIn 0.85s var(--ease-out-cubic) 0.3s both;
+    }
+
+    /* Atmospheric Glow */
+    .seal-ambient-glow {
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(8, 118, 111, 0.08) 0%, rgba(8, 118, 111, 0.02) 55%, transparent 75%);
+      pointer-events: none;
+    }
+
+    /* Diagnostic SVG Stage */
+    .diagnostic-svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Outer Ring Rotation */
+    .rotate-clockwise {
+      transform-origin: 130px 118px;
+      animation: spinClockwise 26s linear infinite;
+    }
+
+    .rotate-counter {
+      transform-origin: 130px 118px;
+      animation: spinCounter 19s linear infinite;
+    }
+
+    /* Scanning Laser Line */
+    .scanning-beam {
+      position: absolute;
+      top: 78px;
+      left: 85px;
+      width: 90px;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, rgba(8, 118, 111, 0.75), transparent);
+      box-shadow: 0 0 6px rgba(8, 118, 111, 0.45);
+      pointer-events: none;
+      animation: scanSweep 3.8s ease-in-out infinite;
+    }
+
+    /* Floating UAE Flag on Seal Perimeter (~1:30 position) */
+    .floating-flag-wrap {
+      position: absolute;
+      top: 26px;
+      right: 32px;
+      width: 38px;
+      height: 24px;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
+      animation: gentleFloat 4s ease-in-out infinite;
+    }
+
+    html[dir="rtl"] .floating-flag-wrap {
+      right: auto;
+      left: 32px;
+    }
+
+    /* Central Dermal Shield */
+    .central-shield-container {
+      position: relative;
+      width: 66px;
+      height: 78px;
+      margin-top: -24px;
+      filter: drop-shadow(0 4px 10px rgba(6, 95, 88, 0.18));
+      animation: shieldBreathe 4s ease-in-out infinite;
+    }
+
+    /* Gold Focus Dot Above Shield Apex */
+    .gold-focus-dot {
+      position: absolute;
+      top: 73px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #D97706;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+      animation: pulseGold 2.4s ease-in-out infinite;
+      z-index: 5;
+    }
+
+    /* Identity Text Lockup Below Shield */
+    .seal-identity-lockup {
+      position: absolute;
+      bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .seal-wordmark-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .seal-wordmark {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1.4px;
+      color: var(--dark-green);
+      line-height: 1;
+    }
+
+    .seal-badge-ai {
+      background: #0F172A;
+      color: #FFFFFF;
+      font-size: 9.5px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      padding: 2.5px 5.5px;
+      border-radius: 4px;
+      line-height: 1;
+    }
+
+    .seal-caption {
+      font-size: 7.5px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      color: rgba(82, 121, 111, 0.9);
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    /* ==========================================================================
+       D. PRIMARY ACTION & TRUST LABELS
+       ========================================================================== */
+    .action-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      animation: fadeInUp 0.75s var(--ease-out-cubic) 0.4s both;
+    }
+
+    .btn-enter {
+      width: 100%;
+      height: 54px;
+      background: var(--button-teal);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 14px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      box-shadow: 0 7px 18px rgba(7, 90, 90, 0.28);
+      transition: all 0.22s var(--ease-out-cubic);
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .btn-enter:hover {
+      background: var(--button-hover);
+      box-shadow: 0 9px 22px rgba(7, 90, 90, 0.35);
+      transform: translateY(-1.5px);
+    }
+
+    .btn-enter:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 4px 12px rgba(7, 90, 90, 0.25);
+    }
+
+    .btn-arrow-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-enter:hover .btn-arrow-circle {
+      transform: translateX(2px);
+    }
+
+    html[dir="rtl"] .btn-enter:hover .btn-arrow-circle {
+      transform: translateX(-2px);
+    }
+
+    .btn-arrow-icon {
+      width: 18px;
+      height: 18px;
+      stroke: #FFFFFF;
+      stroke-width: 2.2;
+      fill: none;
+      transition: transform 0.2s ease;
+    }
+
+    html[dir="rtl"] .btn-arrow-icon {
+      transform: rotate(180deg);
+    }
+
+    /* Trust Labels Row */
+    .trust-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .trust-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted-grey);
+    }
+
+    .trust-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--brand-teal);
+    }
+
+    /* ==========================================================================
+       E. BOTTOM STATUS
+       ========================================================================== */
+    .bottom-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding-bottom: 8px;
+      animation: fadeIn 0.75s var(--ease-out-cubic) 0.55s both;
+    }
+
+    .status-code {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: #94A3B8;
+    }
+
+    .status-divider {
+      width: 22px;
+      height: 1px;
+      background: #E2E8F0;
+    }
+
+    .status-ready {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #16A34A;
+      text-transform: uppercase;
+    }
+
+    /* ==========================================================================
+       KEYFRAME ANIMATIONS
+       ========================================================================== */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scaleFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes spinClockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spinCounter {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    @keyframes scanSweep {
+      0%, 10% { transform: translateY(0); opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      90%, 100% { transform: translateY(75px); opacity: 0; }
+    }
+
+    @keyframes pulseGold {
+      0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 6px rgba(245, 158, 11, 0.4); }
+      50% { transform: translateX(-50%) scale(1.25); box-shadow: 0 0 12px rgba(245, 158, 11, 0.75); }
+    }
+
+    @keyframes gentleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    @keyframes shieldBreathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.015); }
+    }
+
+    /* Accessibility: Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-viewport">
+    <!-- A. TOP HEADER -->
+    <header class="app-header">
+      <div class="brand-lockup">
+        <!-- Shield Icon SVG -->
+        <svg class="brand-shield-svg" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 0L24 5V18C24 23.5 12 28 12 28C12 28 0 23.5 0 18V5L12 0Z" fill="#08766F"/>
+          <path d="M6 13C8.5 11 15.5 11 18 13" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M7 16C9 14.2 15 14.2 17 16" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M8.5 19C10 17.5 14 17.5 15.5 19" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <div class="brand-text">
+          <span class="brand-name" id="brand-title">SKINGUARD</span>
+          <span class="brand-subtitle" id="brand-sub">CLINICAL AI</span>
+        </div>
+      </div>
+
+      <!-- Language Switcher -->
+      <button class="lang-toggle" id="lang-btn" aria-label="Toggle Arabic / English">
+        <svg class="lang-icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <span id="lang-text">العربية</span>
+      </button>
+    </header>
+
+    <!-- B. MAIN CONTENT -->
+    <main class="main-content">
+      <!-- 1. UAE Digital Health Identifier -->
+      <div class="uae-tag">
+        <canvas class="mini-flag-canvas" id="mini-flag" width="44" height="26" aria-hidden="true"></canvas>
+        <span class="uae-tag-text" id="tag-text">UAE DIGITAL HEALTH</span>
+      </div>
+
+      <!-- 2. Primary Headline -->
+      <div class="headline-wrap">
+        <h1 class="headline-line1" id="headline-1">Smarter skin triage.</h1>
+        <h1 class="headline-line2" id="headline-2">Safer next steps.</h1>
+        <p class="supporting-copy" id="support-copy">Clinical guidance designed for clear, timely care.</p>
+      </div>
+
+      <!-- 3. Central Clinical Seal -->
+      <div class="seal-stage">
+        <!-- Ambient Pale-Mint Glow -->
+        <div class="seal-ambient-glow" aria-hidden="true"></div>
+
+        <!-- Concentric Diagnostic Field SVG -->
+        <svg class="diagnostic-svg" viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- Outer Thin Ring with Markers (Rotating Clockwise) -->
+          <g class="rotate-clockwise">
+            <circle cx="130" cy="118" r="112" stroke="#80CBC4" stroke-width="1.0" stroke-opacity="0.38"/>
+            <!-- Satellite Marker: Amber at ~2 o'clock -->
+            <circle cx="218" cy="74" r="3" fill="#D97706"/>
+            <!-- Satellite Marker: Muted at ~8 o'clock -->
+            <circle cx="48" cy="170" r="2.5" fill="#08766F" fill-opacity="0.5"/>
+          </g>
+
+          <!-- Middle Dashed Ring with Markers (Rotating Counter-Clockwise) -->
+          <g class="rotate-counter">
+            <circle cx="130" cy="118" r="84" stroke="#08766F" stroke-width="0.9" stroke-opacity="0.22" stroke-dasharray="4 6"/>
+            <!-- Satellite Marker: Red '01' at ~10 o'clock -->
+            <circle cx="68" cy="62" r="3.2" fill="#EF4444"/>
+            <!-- Satellite Marker: Teal at ~4 o'clock -->
+            <circle cx="192" cy="172" r="2.8" fill="#08766F"/>
+          </g>
+
+          <!-- Innermost Fine Circle -->
+          <circle cx="130" cy="118" r="58" stroke="#80CBC4" stroke-width="0.8" stroke-opacity="0.2"/>
+
+          <!-- Label '01' near Red Marker -->
+          <text x="56" y="56" fill="#EF4444" font-size="7.5" font-weight="900" font-family="'Manrope', sans-serif">01</text>
+        </svg>
+
+        <!-- Scanning Laser Beam -->
+        <div class="scanning-beam" aria-hidden="true"></div>
+
+        <!-- Gold Focus Dot -->
+        <div class="gold-focus-dot" aria-hidden="true"></div>
+
+        <!-- Floating Waving Cloth UAE Flag (~1:30 Position) -->
+        <div class="floating-flag-wrap">
+          <canvas id="waving-flag" width="76" height="48" style="width: 38px; height: 24px; border-radius: 2px;"></canvas>
+        </div>
+
+        <!-- Central Healthcare Dermal Shield -->
+        <div class="central-shield-container">
+          <svg viewBox="0 0 66 78" width="66" height="78" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="shieldGrad" x1="33" y1="0" x2="33" y2="78" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#098A82"/>
+                <stop offset="100%" stop-color="#065F58"/>
+              </linearGradient>
+            </defs>
+            <!-- Shield Body -->
+            <path d="M33 0L66 14V48C66 63 33 78 33 78C33 78 0 63 0 48V14L33 0Z" fill="url(#shieldGrad)"/>
+            <path d="M33 0L66 14V48C66 63 33 78 33 78C33 78 0 63 0 48V14L33 0Z" stroke="#044843" stroke-width="1.2" stroke-opacity="0.5"/>
+            <!-- 4 Concentric White Dermal Strata Arches -->
+            <path d="M18 36C22 30 44 30 48 36" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M20 44C24 38 42 38 46 44" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M22 52C25 46.5 41 46.5 44 52" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M25 60C27 55 39 55 41 60" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Identity Wordmark Below Shield -->
+        <div class="seal-identity-lockup">
+          <div class="seal-wordmark-row">
+            <span class="seal-wordmark">SKINGUARD</span>
+            <span class="seal-badge-ai">AI</span>
+          </div>
+          <span class="seal-caption" id="seal-caption">CLINICAL INTELLIGENCE · HUMAN CARE</span>
+        </div>
+      </div>
+
+      <!-- 4. Primary Action & Trust Labels -->
+      <div class="action-section">
+        <a href="/app" class="btn-enter" id="btn-enter">
+          <span id="btn-label">Enter SkinGuard</span>
+          <div class="btn-arrow-circle">
+            <svg class="btn-arrow-icon" viewBox="0 0 24 24">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </div>
+        </a>
+
+        <!-- Trust Indicators -->
+        <div class="trust-row">
+          <div class="trust-item">
+            <span class="trust-dot"></span>
+            <span id="trust-1">Private</span>
+          </div>
+          <div class="trust-item">
+            <span class="trust-dot"></span>
+            <span id="trust-2">Clinical</span>
+          </div>
+          <div class="trust-item">
+            <span class="trust-dot"></span>
+            <span id="trust-3">Connected</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- C. BOTTOM STATUS -->
+    <footer class="bottom-status">
+      <span class="status-code">SG UAE / 2026</span>
+      <div class="status-divider"></div>
+      <span class="status-ready" id="status-ready">READY</span>
+    </footer>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. MATHEMATICAL FABRIC WAVING UAE FLAG ON HTML5 CANVAS
+    // =========================================================================
+    function drawWavingUaeFlag(canvasId, speedFactor) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      let phase = 0;
+
+      const RED = '#EF3340';
+      const GREEN = '#159657';
+      const WHITE = '#FFFFFF';
+      const BLACK = '#171B1B';
+
+      function render() {
+        ctx.clearRect(0, 0, w, h);
+        const slices = 32;
+        const sliceW = w / slices;
+        const hoistW = w * 0.28;
+
+        for (let i = 0; i < slices; i++) {
+          const x0 = i * sliceW;
+          const x1 = (i + 1) * sliceW;
+
+          // Sinusoidal cloth physics wave
+          const wave0 = Math.sin(phase + (x0 / w) * Math.PI * 2) * 2.2;
+          const wave1 = Math.sin(phase + (x1 / w) * Math.PI * 2) * 2.2;
+
+          // Realistic light sheen across fabric curve
+          const light = 1.0 + 0.12 * Math.cos(phase + (x0 / w) * Math.PI * 2);
+
+          if (x0 < hoistW) {
+            // Hoist: Red
+            ctx.fillStyle = shadeColor(RED, light);
+            drawSlice(ctx, x0, x1, wave0, wave1, 0, h);
+          } else {
+            // Fly: Green (Top), White (Middle), Black (Bottom)
+            const stripeH = h / 3;
+
+            // Green
+            ctx.fillStyle = shadeColor(GREEN, light);
+            drawSlice(ctx, x0, x1, wave0, wave1, 0, stripeH);
+
+            // White
+            ctx.fillStyle = shadeColor(WHITE, light);
+            drawSlice(ctx, x0, x1, wave0, wave1, stripeH, stripeH * 2);
+
+            // Black
+            ctx.fillStyle = shadeColor(BLACK, light);
+            drawSlice(ctx, x0, x1, wave0, wave1, stripeH * 2, h);
+          }
+        }
+
+        phase += 0.045 * speedFactor;
+        requestAnimationFrame(render);
+      }
+
+      function drawSlice(context, x0, x1, w0, w1, y0, y1) {
+        context.beginPath();
+        context.moveTo(x0, y0 + w0);
+        context.lineTo(x1, y0 + w1);
+        context.lineTo(x1, y1 + w1);
+        context.lineTo(x0, y1 + w0);
+        context.closePath();
+        context.fill();
+      }
+
+      function shadeColor(color, factor) {
+        // Fast color tinting
+        if (color === '#FFFFFF') {
+          const v = Math.min(255, Math.floor(255 * factor));
+          return `rgb(${v}, ${v}, ${v})`;
+        }
+        if (color === '#171B1B') {
+          const v = Math.min(255, Math.floor(25 * factor));
+          return `rgb(${v}, ${v}, ${v})`;
+        }
+        if (color === '#EF3340') {
+          const r = Math.min(255, Math.floor(239 * factor));
+          const g = Math.min(255, Math.floor(51 * factor));
+          const b = Math.min(255, Math.floor(64 * factor));
+          return `rgb(${r}, ${g}, ${b})`;
+        }
+        if (color === '#159657') {
+          const r = Math.min(255, Math.floor(21 * factor));
+          const g = Math.min(255, Math.floor(150 * factor));
+          const b = Math.min(255, Math.floor(87 * factor));
+          return `rgb(${r}, ${g}, ${b})`;
+        }
+        return color;
+      }
+
+      render();
+    }
+
+    // Initialize Canvas Flags
+    drawWavingUaeFlag('mini-flag', 1.0);
+    drawWavingUaeFlag('waving-flag', 1.0);
+
+    // =========================================================================
+    // 2. BILINGUAL ENGLISH / ARABIC SWITCHER (TRUE RTL)
+    // =========================================================================
+    let isArabic = false;
+
+    const translations = {
+      en: {
+        brandTitle: "SKINGUARD",
+        brandSub: "CLINICAL AI",
+        langText: "العربية",
+        tagText: "UAE DIGITAL HEALTH",
+        headline1: "Smarter skin triage.",
+        headline2: "Safer next steps.",
+        supportCopy: "Clinical guidance designed for clear, timely care.",
+        sealCaption: "CLINICAL INTELLIGENCE · HUMAN CARE",
+        btnLabel: "Enter SkinGuard",
+        trust1: "Private",
+        trust2: "Clinical",
+        trust3: "Connected",
+        statusReady: "READY",
+        dir: "ltr"
+      },
+      ar: {
+        brandTitle: "سكين جارد",
+        brandSub: "الذكاء الاصطناعي السريري",
+        langText: "English",
+        tagText: "الصحة الرقمية الإماراتية",
+        headline1: "فرز جلدي أكثر ذكاءً.",
+        headline2: "خطوات تالية أكثر أماناً.",
+        supportCopy: "إرشاد سريري واضح للوصول إلى الرعاية في الوقت المناسب.",
+        sealCaption: "ذكاء سريري · رعاية إنسانية",
+        btnLabel: "الدخول إلى سكين جارد",
+        trust1: "خصوصي",
+        trust2: "سريري",
+        trust3: "متصل",
+        statusReady: "جاهز",
+        dir: "rtl"
+      }
+    };
+
+    document.getElementById('lang-btn').addEventListener('click', () => {
+      isArabic = !isArabic;
+      const t = isArabic ? translations.ar : translations.en;
+
+      document.documentElement.setAttribute('dir', t.dir);
+      document.documentElement.setAttribute('lang', isArabic ? 'ar' : 'en');
+
+      document.getElementById('brand-title').textContent = t.brandTitle;
+      document.getElementById('brand-sub').textContent = t.brandSub;
+      document.getElementById('lang-text').textContent = t.langText;
+      document.getElementById('tag-text').textContent = t.tagText;
+      document.getElementById('headline-1').textContent = t.headline1;
+      document.getElementById('headline-2').textContent = t.headline2;
+      document.getElementById('support-copy').textContent = t.supportCopy;
+      document.getElementById('seal-caption').textContent = t.sealCaption;
+      document.getElementById('btn-label').textContent = t.btnLabel;
+      document.getElementById('trust-1').textContent = t.trust1;
+      document.getElementById('trust-2').textContent = t.trust2;
+      document.getElementById('trust-3').textContent = t.trust3;
+      document.getElementById('status-ready').textContent = t.statusReady;
+    });
+  </script>
+</body>
+</html>
