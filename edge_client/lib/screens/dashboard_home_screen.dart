@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'dart:io';
 import '../models/saved_scan_record.dart';
 import '../models/user_profile.dart';
@@ -255,25 +256,6 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                               style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: alertRoutine),
                             ),
                           ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-
-                      // Language Toggle
-                      InkWell(
-                        onTap: widget.onToggleLanguage,
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: borderSubtle),
-                          ),
-                          child: Text(
-                            widget.isArabic ? 'English' : 'العربية',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: brandSky),
-                          ),
                         ),
                       ),
                     ],
@@ -1400,10 +1382,14 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   }
 
   void _showCloudSettingsDialog(BuildContext context) {
-    final controller = TextEditingController(text: TriageApiClient.customServerHost ?? '');
+    final controller = TextEditingController(
+      text: TriageApiClient.customServerHost ?? 'https://future-health-2026.onrender.com',
+    );
     String? pingStatus;
     bool isPinging = false;
     Color statusColor = const Color(0xFF64748B);
+    Timer? pingTicker;
+    double elapsedSeconds = 0.0;
 
     showModalBottomSheet(
       context: context,
@@ -1467,7 +1453,10 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
-                    onPressed: () => Navigator.pop(modalCtx),
+                    onPressed: () {
+                      pingTicker?.cancel();
+                      Navigator.pop(modalCtx);
+                    },
                   ),
                 ],
               ),
@@ -1522,11 +1511,14 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                 spacing: 8,
                 children: [
                   ActionChip(
-                    label: const Text('Render (Cloud)', style: TextStyle(fontSize: 10.5)),
-                    avatar: const Icon(Icons.cloud_done_rounded, size: 14),
+                    label: const Text('Render (Cloud)', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF0284C7))),
+                    avatar: const Icon(Icons.cloud_done_rounded, size: 14, color: Color(0xFF0284C7)),
+                    backgroundColor: const Color(0xFFE0F2FE),
                     onPressed: () {
                       controller.text = 'https://future-health-2026.onrender.com';
-                      setModalState(() {});
+                      setModalState(() {
+                        pingStatus = null;
+                      });
                     },
                   ),
                   ActionChip(
@@ -1534,7 +1526,9 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                     avatar: const Icon(Icons.wifi_rounded, size: 14),
                     onPressed: () {
                       controller.text = 'http://192.168.18.14:8000';
-                      setModalState(() {});
+                      setModalState(() {
+                        pingStatus = null;
+                      });
                     },
                   ),
                   ActionChip(
@@ -1542,7 +1536,9 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                     avatar: const Icon(Icons.usb_rounded, size: 14),
                     onPressed: () {
                       controller.text = 'http://127.0.0.1:8000';
-                      setModalState(() {});
+                      setModalState(() {
+                        pingStatus = null;
+                      });
                     },
                   ),
                 ],
@@ -1550,26 +1546,26 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
               if (pingStatus != null) ...[
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: statusColor.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: statusColor.withOpacity(0.35), width: 1.2),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         statusColor == const Color(0xFF059669)
                             ? Icons.check_circle_rounded
-                            : Icons.info_outline_rounded,
-                        size: 16,
+                            : (isPinging ? Icons.cloud_sync_rounded : Icons.info_outline_rounded),
+                        size: 18,
                         color: statusColor,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           pingStatus!,
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: statusColor),
+                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: statusColor),
                         ),
                       ),
                     ],
@@ -1596,19 +1592,40 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                                 });
                                 return;
                               }
+                              
+                              elapsedSeconds = 0.0;
                               setModalState(() {
                                 isPinging = true;
-                                pingStatus = 'Testing connection...';
+                                pingStatus = 'Pinging Cloud Gateway... (0.0s)';
                                 statusColor = const Color(0xFF0284C7);
                               });
-                              final ok = await TriageApiClient.pingServer(testTarget);
+
+                              pingTicker?.cancel();
+                              pingTicker = Timer.periodic(const Duration(milliseconds: 100), (t) {
+                                if (!modalCtx.mounted) {
+                                  t.cancel();
+                                  return;
+                                }
+                                elapsedSeconds += 0.1;
+                                setModalState(() {
+                                  pingStatus = 'Pinging Cloud Gateway... (${elapsedSeconds.toStringAsFixed(1)}s)';
+                                });
+                              });
+
+                              final res = await TriageApiClient.pingServerDetailed(testTarget);
+                              pingTicker?.cancel();
+
+                              if (!modalCtx.mounted) return;
                               setModalState(() {
                                 isPinging = false;
-                                if (ok) {
-                                  pingStatus = '✓ Connected successfully (HTTP 200 Live)';
+                                if (res.ok) {
+                                  pingStatus = '✓ Connected successfully (HTTP 200 Live • ${res.latencyMs}ms)';
                                   statusColor = const Color(0xFF059669);
+                                  // Automatically save active server host
+                                  LocalStorageService.saveServerHost(testTarget);
+                                  TriageApiClient.customServerHost = testTarget;
                                 } else {
-                                  pingStatus = '⚠️ Unreachable: will use On-Device Autonomous Engine';
+                                  pingStatus = '⚠️ ${res.message}';
                                   statusColor = const Color(0xFFD97706);
                                 }
                               });
@@ -1616,7 +1633,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                       icon: isPinging
                           ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.network_ping_rounded, size: 16),
-                      label: const Text('Test Ping', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      label: Text(isPinging ? 'Pinging...' : 'Test Ping', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1629,6 +1646,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                       onPressed: () async {
+                        pingTicker?.cancel();
                         final val = controller.text.trim();
                         await LocalStorageService.saveServerHost(val);
                         TriageApiClient.customServerHost = val.isEmpty ? null : val;
@@ -1657,7 +1675,9 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
           ),
         ),
       ),
-    );
+    ).then((_) {
+      pingTicker?.cancel();
+    });
   }
 
   void _showUpdateDialog(BuildContext context) {

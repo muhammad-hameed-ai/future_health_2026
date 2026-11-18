@@ -177,17 +177,67 @@ class TriageApiClient {
     return null;
   }
 
-  /// Pings a host to check live connection status
-  static Future<bool> pingServer([String? specificUrl]) async {
-    final testUrl = specificUrl ?? (_cachedActiveBaseUrl ?? candidateBaseUrls.first);
-    final cleanHost = testUrl.replaceAll('/api/v1', '');
+  /// Pings a host to check live connection status with granular latency & diagnostic metrics
+  static Future<({bool ok, int latencyMs, int statusCode, String message})> pingServerDetailed([String? specificUrl]) async {
+    final rawUrl = (specificUrl != null && specificUrl.trim().isNotEmpty)
+        ? specificUrl.trim()
+        : (_cachedActiveBaseUrl ?? candidateBaseUrls.first);
+
+    var cleanHost = rawUrl;
+    if (!cleanHost.startsWith('http://') && !cleanHost.startsWith('https://')) {
+      cleanHost = 'https://$cleanHost';
+    }
+    while (cleanHost.endsWith('/')) {
+      cleanHost = cleanHost.substring(0, cleanHost.length - 1);
+    }
+    cleanHost = cleanHost.replaceAll('/api/v1', '');
+
+    final stopwatch = Stopwatch()..start();
     try {
       final uri = Uri.parse('$cleanHost/health');
-      final res = await http.get(uri).timeout(const Duration(seconds: 3));
-      return res.statusCode == 200;
-    } catch (_) {
-      return false;
+      final res = await http.get(uri).timeout(const Duration(seconds: 15));
+      stopwatch.stop();
+      final latency = stopwatch.elapsedMilliseconds;
+
+      if (res.statusCode == 200) {
+        _cachedActiveBaseUrl = '$cleanHost/api/v1';
+        return (
+          ok: true,
+          latencyMs: latency,
+          statusCode: 200,
+          message: 'Connected successfully (HTTP 200 Live)',
+        );
+      } else {
+        return (
+          ok: false,
+          latencyMs: latency,
+          statusCode: res.statusCode,
+          message: 'Server returned HTTP ${res.statusCode}',
+        );
+      }
+    } on TimeoutException {
+      stopwatch.stop();
+      return (
+        ok: false,
+        latencyMs: stopwatch.elapsedMilliseconds,
+        statusCode: 408,
+        message: 'Timeout: Cloud container warming up. Please re-test.',
+      );
+    } catch (e) {
+      stopwatch.stop();
+      return (
+        ok: false,
+        latencyMs: stopwatch.elapsedMilliseconds,
+        statusCode: 503,
+        message: 'Could not connect: ${e.toString().split('\n').first}',
+      );
     }
+  }
+
+  /// Pings a host to check live connection status
+  static Future<bool> pingServer([String? specificUrl]) async {
+    final res = await pingServerDetailed(specificUrl);
+    return res.ok;
   }
 
   /// Transmits the on-device EdgeRiskVector to the RAG backend.

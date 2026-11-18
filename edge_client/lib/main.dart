@@ -3,6 +3,7 @@ import 'screens/welcome_logo_screen.dart';
 import 'services/triage_api_client.dart';
 import 'services/auth_service.dart';
 import 'services/inference_service.dart';
+import 'services/language_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,12 @@ void main() {
 }
 
 void _initializeBackgroundServices() async {
+  try {
+    await LanguageService.init();
+  } catch (e) {
+    debugPrint('Language init notice: $e');
+  }
+
   try {
     await TriageApiClient.initSavedHost();
   } catch (e) {

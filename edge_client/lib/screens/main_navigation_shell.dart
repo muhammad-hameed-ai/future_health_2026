@@ -3,6 +3,7 @@ import 'dashboard_home_screen.dart';
 import 'smart_scan_wizard_screen.dart';
 import 'clinical_history_screen.dart';
 import 'clinical_learn_screen.dart';
+import '../services/language_service.dart';
 
 /// Master Application Shell for SkinGuard UAE (Executive 4-Tab Framework).
 /// Unifies the Population Health Dashboard, Guided Clinical Intake Wizard,
@@ -24,12 +25,26 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _isArabic = LanguageService.isArabic;
+    LanguageService.isArabicNotifier.addListener(_onLanguageChanged);
+  }
+
+  void _onLanguageChanged() {
+    if (mounted) {
+      setState(() {
+        _isArabic = LanguageService.isArabic;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    LanguageService.isArabicNotifier.removeListener(_onLanguageChanged);
+    super.dispose();
   }
 
   void _toggleLanguage() {
-    setState(() {
-      _isArabic = !_isArabic;
-    });
+    LanguageService.toggleLanguage();
   }
 
   void _navigateToWizard([Map<String, dynamic>? sampleData]) {
@@ -67,64 +82,67 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
       const ClinicalLearnScreen(),
     ];
 
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: pages,
-      ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(
-            top: BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x0A000000),
-              blurRadius: 10,
-              offset: Offset(0, -2),
-            ),
-          ],
+    return Directionality(
+      textDirection: _isArabic ? TextDirection.rtl : TextDirection.ltr,
+      child: Scaffold(
+        body: IndexedStack(
+          index: _currentIndex,
+          children: pages,
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  index: 0,
-                  icon: Icons.dashboard_outlined,
-                  activeIcon: Icons.dashboard_rounded,
-                  label: _isArabic ? 'الرئيسية' : 'Dashboard',
-                  activeColor: brandBlue,
-                  inactiveColor: unselectedColor,
-                ),
-                _buildNavItem(
-                  index: 1,
-                  icon: Icons.camera_enhance_outlined,
-                  activeIcon: Icons.camera_enhance_rounded,
-                  label: _isArabic ? 'مسار الفحص' : 'Scan Wizard',
-                  activeColor: brandBlue,
-                  inactiveColor: unselectedColor,
-                ),
-                _buildNavItem(
-                  index: 2,
-                  icon: Icons.folder_shared_outlined,
-                  activeIcon: Icons.folder_shared_rounded,
-                  label: _isArabic ? 'السجل الطبي' : 'Registry',
-                  activeColor: brandBlue,
-                  inactiveColor: unselectedColor,
-                ),
-                _buildNavItem(
-                  index: 3,
-                  icon: Icons.menu_book_outlined,
-                  activeIcon: Icons.menu_book_rounded,
-                  label: _isArabic ? 'البروتوكولات' : 'SOP Protocol',
-                  activeColor: brandBlue,
-                  inactiveColor: unselectedColor,
-                ),
-              ],
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x0A000000),
+                blurRadius: 10,
+                offset: Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(
+                    index: 0,
+                    icon: Icons.dashboard_outlined,
+                    activeIcon: Icons.dashboard_rounded,
+                    label: _isArabic ? 'الرئيسية' : 'Dashboard',
+                    activeColor: brandBlue,
+                    inactiveColor: unselectedColor,
+                  ),
+                  _buildNavItem(
+                    index: 1,
+                    icon: Icons.camera_enhance_outlined,
+                    activeIcon: Icons.camera_enhance_rounded,
+                    label: _isArabic ? 'مسار الفحص' : 'Scan Wizard',
+                    activeColor: brandBlue,
+                    inactiveColor: unselectedColor,
+                  ),
+                  _buildNavItem(
+                    index: 2,
+                    icon: Icons.folder_shared_outlined,
+                    activeIcon: Icons.folder_shared_rounded,
+                    label: _isArabic ? 'السجل الطبي' : 'Registry',
+                    activeColor: brandBlue,
+                    inactiveColor: unselectedColor,
+                  ),
+                  _buildNavItem(
+                    index: 3,
+                    icon: Icons.menu_book_outlined,
+                    activeIcon: Icons.menu_book_rounded,
+                    label: _isArabic ? 'البروتوكولات' : 'SOP Protocol',
+                    activeColor: brandBlue,
+                    inactiveColor: unselectedColor,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

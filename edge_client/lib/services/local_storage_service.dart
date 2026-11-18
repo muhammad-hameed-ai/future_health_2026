@@ -68,6 +68,28 @@ class LocalStorageService {
     } catch (_) {}
   }
 
+  /// Retrieves user's persisted language choice ('en' or 'ar')
+  static Future<String?> getSavedLanguage() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/skinguard_language.txt');
+      if (await file.exists()) {
+        final lang = (await file.readAsString()).trim();
+        if (lang.isNotEmpty) return lang;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// Persists user's language choice
+  static Future<void> saveLanguagePreference(String lang) async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/skinguard_language.txt');
+      await file.writeAsString(lang.trim());
+    } catch (_) {}
+  }
+
   /// Persists a new clinical scan dossier to the local database
   static Future<void> saveRecord(SavedScanRecord newRecord) async {
     try {

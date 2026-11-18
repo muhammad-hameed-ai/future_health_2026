@@ -4,6 +4,7 @@ import 'main_navigation_shell.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
 import '../services/inference_service.dart';
+import '../services/language_service.dart';
 
 /// Ultra-Premium UAE Digital Health Welcome Screen for SkinGuard AI.
 /// 
@@ -52,6 +53,9 @@ class _WelcomeLogoScreenState extends State<WelcomeLogoScreen>
   @override
   void initState() {
     super.initState();
+
+    _isArabic = LanguageService.isArabic;
+    LanguageService.isArabicNotifier.addListener(_onLanguageChanged);
 
     // 1. Entrance Staggered Animation (1.2s total duration)
     _entranceController = AnimationController(
@@ -149,8 +153,17 @@ class _WelcomeLogoScreenState extends State<WelcomeLogoScreen>
     }
   }
 
+  void _onLanguageChanged() {
+    if (mounted) {
+      setState(() {
+        _isArabic = LanguageService.isArabic;
+      });
+    }
+  }
+
   @override
   void dispose() {
+    LanguageService.isArabicNotifier.removeListener(_onLanguageChanged);
     _entranceController.dispose();
     _ringRotationController.dispose();
     _flagWaveController.dispose();
@@ -165,6 +178,7 @@ class _WelcomeLogoScreenState extends State<WelcomeLogoScreen>
 
     final Widget targetScreen = !AuthService.isAuthenticated
         ? LoginScreen(
+            isArabic: LanguageService.isArabic,
             onLoginSuccess: () {
               Navigator.of(context).pushReplacement(
                 PageRouteBuilder(
@@ -193,9 +207,7 @@ class _WelcomeLogoScreenState extends State<WelcomeLogoScreen>
   }
 
   void _toggleLanguage() {
-    setState(() {
-      _isArabic = !_isArabic;
-    });
+    LanguageService.toggleLanguage();
   }
 
   @override
