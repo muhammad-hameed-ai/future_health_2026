@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/saved_scan_record.dart';
 import '../services/local_storage_service.dart';
 import '../services/pdf_export_service.dart';
+import '../services/language_service.dart';
 import '../widgets/region_of_interest_modal.dart';
 
 /// Page 2: Clinical Scan Archive & Local Database.
@@ -22,6 +23,19 @@ class _ClinicalHistoryScreenState extends State<ClinicalHistoryScreen> {
   void initState() {
     super.initState();
     _loadRecords();
+    LocalStorageService.databaseRevisionNotifier.addListener(_onDatabaseChanged);
+  }
+
+  void _onDatabaseChanged() {
+    if (mounted) {
+      _loadRecords();
+    }
+  }
+
+  @override
+  void dispose() {
+    LocalStorageService.databaseRevisionNotifier.removeListener(_onDatabaseChanged);
+    super.dispose();
   }
 
   Future<void> _loadRecords() async {
@@ -344,6 +358,7 @@ class _ClinicalHistoryScreenState extends State<ClinicalHistoryScreen> {
             Row(
               children: [
                 Expanded(
+                  flex: 5,
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF0284C7),
@@ -352,12 +367,16 @@ class _ClinicalHistoryScreenState extends State<ClinicalHistoryScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     ),
                     icon: const Icon(Icons.description_outlined, size: 14),
-                    label: const Text('View Dossier', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                    label: Text(
+                      LanguageService.isArabic ? 'عرض الملف' : 'View Dossier',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
                     onPressed: () => _openRecordDetailModal(record),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
+                  flex: 5,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0F172A),
@@ -367,13 +386,102 @@ class _ClinicalHistoryScreenState extends State<ClinicalHistoryScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     ),
                     icon: const Icon(Icons.picture_as_pdf_outlined, size: 14),
-                    label: const Text('Export PDF', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                    label: Text(
+                      LanguageService.isArabic ? 'تصدير PDF' : 'Export PDF',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
                     onPressed: () => _exportPdfForRecord(record),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFFFECACA)),
+                  ),
+                  child: IconButton(
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: const EdgeInsets.all(7),
+                    icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFDC2626), size: 18),
+                    tooltip: LanguageService.isArabic ? 'حذف التقرير' : 'Delete Report',
+                    onPressed: () => _deleteRecordWithUndo(record),
                   ),
                 ),
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteRecordWithUndo(SavedScanRecord record) async {
+    final isArabic = LanguageService.isArabic;
+    final index = _records.indexOf(record);
+    if (index < 0) return;
+
+    // 1. Optimistic removal from UI state
+    setState(() {
+      _records.removeAt(index);
+    });
+
+    // 2. Persist deletion in local storage
+    await LocalStorageService.deleteRecord(record.id);
+
+    if (!mounted) return;
+
+    // 3. Show floating confirmation SnackBar with UNDO action for 4 seconds
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                isArabic
+                    ? 'تم حذف التقرير الطبي ${record.id}'
+                    : 'Deleted clinical report ${record.id}',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF1E293B),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        action: SnackBarAction(
+          label: isArabic ? 'تراجع' : 'UNDO',
+          textColor: const Color(0xFF38BDF8),
+          onPressed: () async {
+            if (!mounted) return;
+            setState(() {
+              if (index <= _records.length) {
+                _records.insert(index, record);
+              } else {
+                _records.insert(0, record);
+              }
+            });
+            await LocalStorageService.restoreRecord(record, index);
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  isArabic
+                      ? '✓ تمت استعادة التقرير الطبي ${record.id}'
+                      : '✓ Restored clinical report ${record.id}',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                backgroundColor: const Color(0xFF059669),
+                duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            );
+          },
         ),
       ),
     );

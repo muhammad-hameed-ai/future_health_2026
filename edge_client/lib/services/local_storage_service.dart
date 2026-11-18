@@ -10,6 +10,13 @@ import '../models/user_profile.dart';
 class LocalStorageService {
   static const String _dbFileName = 'skinguard_clinical_records.json';
 
+  /// Emits updates whenever the local database records are modified (added, deleted, or restored)
+  static final ValueNotifier<int> databaseRevisionNotifier = ValueNotifier<int>(0);
+
+  static void _notifyDatabaseChanged() {
+    databaseRevisionNotifier.value++;
+  }
+
   /// Resolves the persistent file path in the app's documents directory
   static Future<File> _getDatabaseFile() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -114,9 +121,42 @@ class LocalStorageService {
       }
 
       await _writeRecords(file, currentRecords);
+      _notifyDatabaseChanged();
       debugPrint('✅ Clinical record ${newRecord.id} saved to local database.');
     } catch (e) {
       debugPrint('Error saving record to local database: $e');
+    }
+  }
+
+  /// Restores a previously deleted record back into the local database
+  static Future<void> restoreRecord(SavedScanRecord record, [int? preferredIndex]) async {
+    try {
+      final file = await _getDatabaseFile();
+      List<SavedScanRecord> currentRecords = [];
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        if (content.trim().isNotEmpty) {
+          final List<dynamic> jsonList = jsonDecode(content);
+          currentRecords = jsonList
+              .map((item) => SavedScanRecord.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+      }
+
+      final existingIdx = currentRecords.indexWhere((r) => r.id == record.id);
+      if (existingIdx >= 0) {
+        currentRecords[existingIdx] = record;
+      } else if (preferredIndex != null && preferredIndex >= 0 && preferredIndex <= currentRecords.length) {
+        currentRecords.insert(preferredIndex, record);
+      } else {
+        currentRecords.insert(0, record);
+      }
+
+      await _writeRecords(file, currentRecords);
+      _notifyDatabaseChanged();
+      debugPrint('✅ Clinical record ${record.id} restored to local database.');
+    } catch (e) {
+      debugPrint('Error restoring record to local database: $e');
     }
   }
 
@@ -134,6 +174,7 @@ class LocalStorageService {
           .toList();
 
       await _writeRecords(file, records);
+      _notifyDatabaseChanged();
     } catch (e) {
       debugPrint('Error deleting record from local database: $e');
     }
@@ -146,6 +187,7 @@ class LocalStorageService {
       if (await file.exists()) {
         await file.delete();
       }
+      _notifyDatabaseChanged();
     } catch (e) {
       debugPrint('Error clearing local clinical database: $e');
     }

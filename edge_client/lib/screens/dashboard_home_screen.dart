@@ -41,6 +41,19 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     super.initState();
     _loadHistory();
     _loadRemoteConfigAndUpdates();
+    LocalStorageService.databaseRevisionNotifier.addListener(_onDatabaseChanged);
+  }
+
+  void _onDatabaseChanged() {
+    if (mounted) {
+      _loadHistory();
+    }
+  }
+
+  @override
+  void dispose() {
+    LocalStorageService.databaseRevisionNotifier.removeListener(_onDatabaseChanged);
+    super.dispose();
   }
 
   Future<void> _loadRemoteConfigAndUpdates() async {
@@ -980,11 +993,98 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf_outlined, color: Color(0xFF0284C7), size: 20),
-            onPressed: () => PdfExportService.exportAndShareRecord(record, context),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.picture_as_pdf_outlined, color: Color(0xFF0284C7), size: 20),
+                tooltip: widget.isArabic ? 'تصدير PDF' : 'Export PDF',
+                visualDensity: VisualDensity.compact,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                padding: const EdgeInsets.all(5),
+                onPressed: () => PdfExportService.exportAndShareRecord(record, context),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444), size: 19),
+                tooltip: widget.isArabic ? 'حذف السجل' : 'Delete Record',
+                visualDensity: VisualDensity.compact,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                padding: const EdgeInsets.all(5),
+                onPressed: () => _deleteRecentRecordWithUndo(record),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _deleteRecentRecordWithUndo(SavedScanRecord record) async {
+    final index = _recentRecords.indexOf(record);
+    if (index < 0) return;
+
+    // 1. Optimistic removal from UI list
+    setState(() {
+      _recentRecords.removeAt(index);
+    });
+
+    // 2. Persist deletion in local database
+    await LocalStorageService.deleteRecord(record.id);
+
+    if (!mounted) return;
+
+    // 3. Show floating confirmation SnackBar with UNDO action for 4 seconds
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                widget.isArabic
+                    ? 'تم حذف السجل ${record.id}'
+                    : 'Deleted patient dossier ${record.id}',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF1E293B),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        action: SnackBarAction(
+          label: widget.isArabic ? 'تراجع' : 'UNDO',
+          textColor: const Color(0xFF38BDF8),
+          onPressed: () async {
+            if (!mounted) return;
+            setState(() {
+              if (index <= _recentRecords.length) {
+                _recentRecords.insert(index, record);
+              } else {
+                _recentRecords.insert(0, record);
+              }
+            });
+            await LocalStorageService.restoreRecord(record, index);
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  widget.isArabic
+                      ? '✓ تمت استعادة السجل ${record.id}'
+                      : '✓ Restored patient dossier ${record.id}',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                backgroundColor: const Color(0xFF059669),
+                duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
