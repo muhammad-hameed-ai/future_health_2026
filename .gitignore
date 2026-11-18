@@ -1,17 +1,29 @@
-# Virtual environment
+# ==============================================================================
+# SkinGuard AI • Enterprise Git Ignore Specification
+# ==============================================================================
+
+# Python & Virtual Environments
 .venv/
 venv/
 ENV/
 env/
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
 
-# Local vector database storage
+# Local Vector Database & SQLite Storage
 local_qdrant_data/
+triage_backend/local_qdrant_data/
 *.db
 *.sqlite3
 
-# Flutter and Dart
+# Flutter & Dart Build Artifacts
 edge_client/.dart_tool/
 edge_client/build/
 edge_client/.flutter-plugins
@@ -21,17 +33,48 @@ edge_client/.pub-cache/
 edge_client/.pub/
 *.lock
 
-# Android build outputs & local config
+# Android Build Outputs, Local Config & Java Keystores
 edge_client/android/.gradle/
 edge_client/android/local.properties
+edge_client/android/app/src/main/java/
+*.keystore
+*.jks
 *.apk
 !triage_backend/static/*.apk
 
-# Environment secrets
+# iOS & macOS Metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+edge_client/ios/Flutter/Generated.xcconfig
+edge_client/ios/Flutter/flutter_export_environment.sh
+
+# Windows Metadata & Temp Logs
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# IDE & Editor Directories
+.idea/
+.vscode/
+*.iml
+
+# Environment & Cryptographic Secrets (Strict Guard)
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.p12
 
-
-# Temporary debug diffs
+# Temporary Scratch Files & Diffs
 diff*.png
 card2_text.png
 test_diag.png
+test_1day.json
+test_payload.json
+generate_architecture_diagram.py
