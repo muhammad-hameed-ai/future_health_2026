@@ -4,10 +4,9 @@ import asyncio
 from collections import defaultdict
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from app.models.schemas import TriageRequest, TriageResponse
 from app.services import rag_agent
 from app.routers import auth
@@ -137,8 +136,13 @@ async def welcome_page():
     return FileResponse(os.path.join(WEB_DIST_DIR, "index.html"))
 
 @app.get("/")
-async def root():
+async def root(request: Request):
     """Root landing endpoint providing clinical gateway operational status and endpoints."""
+    # When accessed directly from a human web browser, seamlessly route to the Flutter Web App
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept and os.path.exists(WEB_DIST_DIR):
+        return RedirectResponse(url="/app/")
+
     return {
         "platform": "SkinGuard UAE • Future Health Challenge 2026",
         "service": "Autonomous Cutaneous Lesion Triage Intelligence Gateway & Web App",
