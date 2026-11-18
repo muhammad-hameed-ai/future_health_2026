@@ -437,6 +437,57 @@
       transform: rotate(180deg);
     }
 
+    .btn-github {
+      width: 100%;
+      height: 44px;
+      background: #FFFFFF;
+      color: #0F172A;
+      border: 1px solid var(--border-mint);
+      border-radius: 12px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s var(--ease-out-cubic);
+      text-decoration: none;
+    }
+
+    .btn-github:hover {
+      background: #F8FAF9;
+      border-color: #A3D4C7;
+      transform: translateY(-1px);
+    }
+
+    .mobile-only-notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(8, 118, 111, 0.05);
+      border: 1px solid rgba(8, 118, 111, 0.15);
+      border-radius: 10px;
+      text-align: left;
+      font-size: 11px;
+      color: var(--muted-grey);
+      line-height: 1.45;
+    }
+
+    html[dir="rtl"] .mobile-only-notice {
+      text-align: right;
+    }
+
+    .notice-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
     /* Trust Labels Row */
     .trust-row {
       display: flex;
@@ -679,29 +730,47 @@
 
       <!-- 4. Primary Action & Trust Labels -->
       <div class="action-section">
-        <a href="/app" class="btn-enter" id="btn-enter">
-          <span id="btn-label">Enter SkinGuard</span>
+        <!-- Direct 1-Click APK Download Button -->
+        <a href="/api/v1/app/download-apk" class="btn-enter" id="btn-download" download>
+          <div style="display: flex; align-items: center; gap: 10px; text-align: left;">
+            <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+            <div>
+              <div id="btn-label" style="font-weight: 800; font-size: 15px; line-height: 1.2;">Download Android App</div>
+              <div style="font-size: 10.5px; opacity: 0.85; font-weight: 600;">v4.0.0 Production Release (97 MB)</div>
+            </div>
+          </div>
           <div class="btn-arrow-circle">
             <svg class="btn-arrow-icon" viewBox="0 0 24 24">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
+              <path d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
         </a>
+
+        <!-- GitHub Repository Button -->
+        <a href="https://github.com/muhammad-hameed-ai/future_health_2026" target="_blank" class="btn-github">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span id="github-label">Open Source GitHub Repository</span>
+        </a>
+
+        <!-- Clinical Privacy & On-Device Security Notice -->
+        <div class="mobile-only-notice">
+          <span class="notice-icon">🔒</span>
+          <span id="notice-text">Clinical skin triage runs exclusively inside the downloaded mobile app under UAE Federal Decree-Law No. 2 of 2019. Zero patient photos leave the smartphone.</span>
+        </div>
 
         <!-- Trust Indicators -->
         <div class="trust-row">
           <div class="trust-item">
             <span class="trust-dot"></span>
-            <span id="trust-1">Private</span>
+            <span id="trust-1">Zero-PII Privacy</span>
           </div>
           <div class="trust-item">
             <span class="trust-dot"></span>
-            <span id="trust-2">Clinical</span>
+            <span id="trust-2">ADPHC Aligned</span>
           </div>
           <div class="trust-item">
             <span class="trust-dot"></span>
-            <span id="trust-3">Connected</span>
+            <span id="trust-3">Malaffi FHIR R4</span>
           </div>
         </div>
       </div>
@@ -832,11 +901,13 @@
         headline2: "Safer next steps.",
         supportCopy: "Clinical guidance designed for clear, timely care.",
         sealCaption: "CLINICAL INTELLIGENCE · HUMAN CARE",
-        btnLabel: "Enter SkinGuard",
-        trust1: "Private",
-        trust2: "Clinical",
-        trust3: "Connected",
-        statusReady: "READY",
+        btnLabel: "Download Android App",
+        githubLabel: "Open Source GitHub Repository",
+        noticeText: "Clinical skin triage runs exclusively inside the downloaded mobile app under UAE Federal Decree-Law No. 2 of 2019. Zero patient photos leave the smartphone.",
+        trust1: "Zero-PII Privacy",
+        trust2: "ADPHC Aligned",
+        trust3: "Malaffi FHIR R4",
+        statusReady: "READY • v4.0.0",
         dir: "ltr"
       },
       ar: {
@@ -848,11 +919,13 @@
         headline2: "خطوات تالية أكثر أماناً.",
         supportCopy: "إرشاد سريري واضح للوصول إلى الرعاية في الوقت المناسب.",
         sealCaption: "ذكاء سريري · رعاية إنسانية",
-        btnLabel: "الدخول إلى سكين جارد",
-        trust1: "خصوصي",
-        trust2: "سريري",
-        trust3: "متصل",
-        statusReady: "جاهز",
+        btnLabel: "تحميل تطبيق أندرويد",
+        githubLabel: "مستودع الكود على جيت هب",
+        noticeText: "يتم فحص الجلد والفرز السريري حصرياً على تطبيق الهاتف الذكي حمايةً للخصوصية الطبية وفقاً للقانون الاتحادي الإماراتي رقم 2 لسنة 2019. لا تغادر أي صور هاتف المريض.",
+        trust1: "خصوصية كاملة",
+        trust2: "معتمد من مركز أبوظبي",
+        trust3: "متوافق مع ملفي",
+        statusReady: "جاهز • الإصدار 4.0.0",
         dir: "rtl"
       }
     };
@@ -873,6 +946,8 @@
       document.getElementById('support-copy').textContent = t.supportCopy;
       document.getElementById('seal-caption').textContent = t.sealCaption;
       document.getElementById('btn-label').textContent = t.btnLabel;
+      document.getElementById('github-label').textContent = t.githubLabel;
+      document.getElementById('notice-text').textContent = t.noticeText;
       document.getElementById('trust-1').textContent = t.trust1;
       document.getElementById('trust-2').textContent = t.trust2;
       document.getElementById('trust-3').textContent = t.trust3;
