@@ -33,7 +33,7 @@
 > 1. *Dual-Head On-Device Neural Inference: Evaluates lesions with clinical precision using two specialized on-device heads: Dermoscopy Head (EfficientNet-B2, AUC 0.9493) and Smartphone Head (AUC 0.7778), guarded by a neural Out-of-Distribution (OOD) Gate (MobileNetV3) and a 200-point isotonic calibration curve (ECE = 0.0072).*
 > 2. *5 Gates of Safety (Dr. Nance Elanar Directives): Strictly separates deterministic medical math (Stolz ABCD Total Dermoscopy Score and Argenziano 7-Point Checklist) from linguistic summarization. The LLM is mathematically forbidden from computing medical risk. Optical filters reject blurry images, glare, selfies, and non-cutaneous surfaces.*
 > 3. *Zero-PII Federal Privacy: Raw photos and biometric identifiers never leave the device. Only an anonymized mathematical risk vector is transmitted.*
-> 4. *Cloud RAG Clinical Guidance: A live Qdrant vector database retrieves NICE NG12 and Cleveland Clinic oncology guidelines, summarized by Google Gemini 3.1 Flash Lite into structured, patient-friendly bilingual (Arabic/English) recommendations.*
+> 4. *Cloud RAG Clinical Guidance: A live Qdrant vector database retrieves NICE NG12 and Cleveland Clinic oncology guidelines, summarized by Google Gemini Enterprise API into structured, patient-friendly bilingual (Arabic/English) recommendations.*
 > 5. *Closed-Loop SLA Tracking: Maps high-risk lesions to a mandatory 14-day Two-Week-Wait (2WW) biopsy SLA at Cleveland Clinic Abu Dhabi, establishes an accountable care navigation tracking protocol, and exports HL7 FHIR dossiers compatible with Malaffi and Sahatna."*
 
 ---
@@ -48,7 +48,7 @@
 ├───────────────────────────────────┼────────────────────────────────────┤
 │ • Framework: Flutter 3.x / Dart   │ • Framework: FastAPI (Python 3.10) │
 │ • AI Runtime: ONNX Runtime C++    │ • Vector Engine: Qdrant Vector DB  │
-│ • Model 1: MobileNetV3 OOD Gate   │ • Clinical LLM: Gemini 3.1 Flash   │
+│ • Model 1: MobileNetV3 OOD Gate   │ • Clinical LLM: Google Gemini API  │
 │ • Model 2: EfficientNet-B2 Dermo  │ • Retrieval: NICE NG12 Guidelines  │
 │ • Model 3: EfficientNet-B2 Mobile │ • Cloud Host: Render Cloud Platform│
 │ • CAM Attention Map: 7x7 Upsample │ • Interop: HL7 / FHIR Malaffi      │
