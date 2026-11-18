@@ -37,13 +37,27 @@ def init_db():
         conn.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         conn.commit()
 
-    # Seed default clinician demo account for Hack2Skill / ADPHC judges
+    # Seed default pre-configured accounts for Hack2Skill / ADPHC judges
     if not get_user_by_email("demo@skinguard.ae"):
         create_user(
             full_name="Fatima Al-Mansouri, RN",
             email="demo@skinguard.ae",
             password="AbuDhabi2026!",
             role="clinician_navigator"
+        )
+    if not get_user_by_email("doctor@skinguard.ae"):
+        create_user(
+            full_name="Dr. Tariq Al-Hashimi, MD",
+            email="doctor@skinguard.ae",
+            password="FutureHealth2026!",
+            role="doctor_specialist"
+        )
+    if not get_user_by_email("admin@skinguard.ae"):
+        create_user(
+            full_name="Director Salem Al-Dhaheri",
+            email="admin@skinguard.ae",
+            password="AdminHealth2026!",
+            role="health_director"
         )
 
 def hash_password(password: str, salt: Optional[str] = None) -> tuple[str, str]:

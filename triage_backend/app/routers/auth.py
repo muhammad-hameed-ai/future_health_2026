@@ -115,7 +115,7 @@ async def login(req: LoginRequest):
     clean_email = req.email.strip().lower()
     user = user_db.get_user_by_email(clean_email)
     
-    # Judge Fail-Safe: Allow both slide credentials for demo clinician account
+    # Judge Fail-Safe: Allow all slide credentials for evaluators
     is_authenticated = False
     if clean_email == "demo@skinguard.ae" and req.password in ("AbuDhabi2026!", "DemoAccess2026!"):
         if not user:
@@ -124,6 +124,24 @@ async def login(req: LoginRequest):
                 email="demo@skinguard.ae",
                 password=req.password,
                 role="clinician_navigator"
+            )
+        is_authenticated = True
+    elif clean_email == "doctor@skinguard.ae" and req.password in ("FutureHealth2026!", "AbuDhabi2026!"):
+        if not user:
+            user = user_db.create_user(
+                full_name="Dr. Tariq Al-Hashimi, MD",
+                email="doctor@skinguard.ae",
+                password=req.password,
+                role="doctor_specialist"
+            )
+        is_authenticated = True
+    elif clean_email == "admin@skinguard.ae" and req.password in ("AdminHealth2026!", "AbuDhabi2026!"):
+        if not user:
+            user = user_db.create_user(
+                full_name="Director Salem Al-Dhaheri",
+                email="admin@skinguard.ae",
+                password=req.password,
+                role="health_director"
             )
         is_authenticated = True
     elif user and user_db.verify_password(req.password, user["password_hash"], user["salt"]):

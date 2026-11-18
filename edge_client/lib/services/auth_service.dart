@@ -134,6 +134,32 @@ class AuthService {
       currentUserNotifier.value = demoUser;
       if (rememberMe) await LocalStorageService.saveUserProfile(demoUser);
       return (success: true, message: 'Offline Demo Mode: Signed in as Nurse Fatima.');
+    } else if (cleanEmail == 'doctor@skinguard.ae' && (password == 'FutureHealth2026!' || password == 'AbuDhabi2026!')) {
+      final doctorUser = UserProfile(
+        id: 'doctor-specialist-101',
+        fullName: 'Dr. Tariq Al-Hashimi, MD',
+        email: 'doctor@skinguard.ae',
+        avatarData: '',
+        role: 'doctor_specialist',
+        accessToken: 'offline-doctor-token-active',
+        isRemembered: rememberMe,
+      );
+      currentUserNotifier.value = doctorUser;
+      if (rememberMe) await LocalStorageService.saveUserProfile(doctorUser);
+      return (success: true, message: 'Offline Demo Mode: Signed in as Dr. Tariq Al-Hashimi.');
+    } else if (cleanEmail == 'admin@skinguard.ae' && (password == 'AdminHealth2026!' || password == 'AbuDhabi2026!')) {
+      final adminUser = UserProfile(
+        id: 'health-director-202',
+        fullName: 'Director Salem Al-Dhaheri',
+        email: 'admin@skinguard.ae',
+        avatarData: '',
+        role: 'health_director',
+        accessToken: 'offline-admin-token-active',
+        isRemembered: rememberMe,
+      );
+      currentUserNotifier.value = adminUser;
+      if (rememberMe) await LocalStorageService.saveUserProfile(adminUser);
+      return (success: true, message: 'Offline Demo Mode: Signed in as Director Salem Al-Dhaheri.');
     }
 
     return (success: false, message: 'Could not connect to health network. Please check connection.');
