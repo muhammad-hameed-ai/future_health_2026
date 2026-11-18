@@ -82,8 +82,8 @@ def search_clinical_guidelines(query_text: str, top_k: int = 3) -> str:
         # 1. Generate query embedding
         logger.debug("Generating query embedding for: %s", query_text[:80])
         candidate_models = [
-            "models/gemini-embedding-001",
             "models/text-embedding-004",
+            "models/embedding-001",
         ]
         query_vector: Optional[List[float]] = None
         last_err = None

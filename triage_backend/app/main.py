@@ -1,5 +1,7 @@
 import os
+import time
 import asyncio
+from collections import defaultdict
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -16,7 +18,7 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 app = FastAPI(
     title="Future Health Triage API & Live Web Portal",
-    version="3.1.0",
+    version="4.0.0",
     description="Privacy-first agentic triage backend & interactive digital portal for the Future Health Challenge 2026."
 )
 
@@ -28,6 +30,64 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# -----------------------------------------------------------------------------
+# DEFENSIVE SECURITY & ADAPTIVE RATE LIMITING (Anti-Brute-Force & Anti-DoS)
+# -----------------------------------------------------------------------------
+_request_records = defaultdict(list)
+MAX_AUTH_REQ_PER_MIN = 25
+MAX_TRIAGE_REQ_PER_MIN = 60
+MAX_PAYLOAD_BYTES = 15 * 1024 * 1024  # 15 MB payload guard
+
+@app.middleware("http")
+async def security_and_rate_limit_middleware(request: Request, call_next):
+    # 1. Payload size guard against memory exhaustion
+    content_length = request.headers.get("content-length")
+    if content_length:
+        try:
+            if int(content_length) > MAX_PAYLOAD_BYTES:
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": "Payload too large. Maximum allowed request size is 15MB."}
+                )
+        except ValueError:
+            pass
+
+    # 2. Adaptive rate limiting for sensitive paths
+    path = request.url.path
+    if path.startswith("/api/v1/auth") or path.startswith("/api/v1/triage"):
+        client_ip = request.client.host if request.client else "unknown"
+        forwarded = request.headers.get("x-forwarded-for")
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        now = time.time()
+        segment = path.split('/')[4] if len(path.split('/')) > 4 else path
+        key = f"{client_ip}:{segment}"
+        timestamps = _request_records[key]
+
+        # Purge records older than 60 seconds
+        _request_records[key] = [t for t in timestamps if now - t < 60.0]
+        timestamps = _request_records[key]
+
+        limit = MAX_AUTH_REQ_PER_MIN if "/auth" in path else MAX_TRIAGE_REQ_PER_MIN
+        if len(timestamps) >= limit:
+            return JSONResponse(
+                status_code=429,
+                headers={"Retry-After": "60"},
+                content={"detail": "Rate limit exceeded. System security threshold reached, please wait 60 seconds."}
+            )
+        timestamps.append(now)
+
+    # Execute request
+    response = await call_next(request)
+
+    # 3. Defensive OWASP Security Headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -93,7 +153,7 @@ async def root():
             "download_apk": "/api/v1/app/download-apk",
             "api_documentation": "/docs"
         },
-        "version": "3.1.0"
+        "version": "4.0.0"
     }
 
 @app.get("/health")
