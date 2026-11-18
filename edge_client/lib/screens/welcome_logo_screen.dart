@@ -180,17 +180,7 @@ class _WelcomeLogoScreenState extends State<WelcomeLogoScreen>
         ? LoginScreen(
             isArabic: LanguageService.isArabic,
             onLoginSuccess: () {
-              Navigator.of(context).pushReplacement(
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const MainNavigationShell(initialIndex: 0),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                  transitionDuration: const Duration(milliseconds: 400),
-                ),
-              );
+              // Guaranteed navigation handled directly inside LoginScreen using its active mounted BuildContext
             },
           )
         : const MainNavigationShell(initialIndex: 0);

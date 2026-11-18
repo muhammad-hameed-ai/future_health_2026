@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'main_navigation_shell.dart';
 
 /// Luxury Clinical Authentication Portal for SkinGuard UAE & Malaffi HIE.
 class LoginScreen extends StatefulWidget {
@@ -39,6 +40,51 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _navigateHomeWithConfirmation({required String message}) {
+    if (!mounted) return;
+
+    // Show vivid confirmation banner
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF059669),
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+
+    // Call external callback if provided
+    try {
+      widget.onLoginSuccess();
+    } catch (_) {}
+
+    // Direct, guaranteed navigation to MainNavigationShell as clean root
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const MainNavigationShell(initialIndex: 0),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+          transitionDuration: const Duration(milliseconds: 350),
+        ),
+        (route) => false,
+      );
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -58,9 +104,13 @@ class _LoginScreenState extends State<LoginScreen> {
         role: _selectedRole,
       );
 
+      if (!mounted) return;
       setState(() => _isLoading = false);
       if (result.success) {
-        widget.onLoginSuccess();
+        final notice = widget.isArabic
+            ? '✓ تم إنشاء الحساب بنجاح! مرحباً بك في سكين جارد.'
+            : '✓ Account Created Successfully! Welcome, ${_nameController.text.trim()}';
+        _navigateHomeWithConfirmation(message: notice);
       } else {
         _showErrorSnackBar(result.message);
       }
@@ -74,7 +124,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (result.success) {
-        widget.onLoginSuccess();
+        final notice = widget.isArabic
+            ? '✓ تم تسجيل الدخول بنجاح! جاري فتح الملف الصحي...'
+            : '✓ Login Successful! Opening Clinical Health Portal...';
+        _navigateHomeWithConfirmation(message: notice);
       } else {
         _showErrorSnackBar(result.message);
       }
@@ -98,7 +151,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
     if (res.success) {
-      widget.onLoginSuccess();
+      final notice = widget.isArabic
+          ? '✓ تم تفعيل الدخول السريع: الممرضة فاطمة المنصوري'
+          : '✓ Demo Access Active: Welcome Nurse Fatima Al-Mansouri';
+      _navigateHomeWithConfirmation(message: notice);
     } else {
       _showErrorSnackBar(res.message);
     }

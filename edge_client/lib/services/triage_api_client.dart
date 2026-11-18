@@ -195,7 +195,7 @@ class TriageApiClient {
     final stopwatch = Stopwatch()..start();
     try {
       final uri = Uri.parse('$cleanHost/health');
-      final res = await http.get(uri).timeout(const Duration(seconds: 15));
+      final res = await http.get(uri).timeout(const Duration(seconds: 25));
       stopwatch.stop();
       final latency = stopwatch.elapsedMilliseconds;
 

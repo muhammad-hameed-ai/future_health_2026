@@ -1396,7 +1396,56 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
-        builder: (modalCtx, setModalState) => Container(
+        builder: (modalCtx, setModalState) {
+          Future<void> executePing(String target) async {
+            final testTarget = target.trim();
+            if (testTarget.isEmpty) {
+              setModalState(() {
+                pingStatus = 'Please enter a server URL to test.';
+                statusColor = const Color(0xFFDC2626);
+              });
+              return;
+            }
+
+            elapsedSeconds = 0.0;
+            setModalState(() {
+              isPinging = true;
+              pingStatus = 'Pinging Cloud Gateway... (0.0s)';
+              statusColor = const Color(0xFF0284C7);
+            });
+
+            pingTicker?.cancel();
+            pingTicker = Timer.periodic(const Duration(milliseconds: 100), (t) {
+              if (!modalCtx.mounted) {
+                t.cancel();
+                return;
+              }
+              elapsedSeconds += 0.1;
+              setModalState(() {
+                pingStatus = 'Pinging Cloud Gateway... (${elapsedSeconds.toStringAsFixed(1)}s)';
+              });
+            });
+
+            final res = await TriageApiClient.pingServerDetailed(testTarget);
+            pingTicker?.cancel();
+
+            if (!modalCtx.mounted) return;
+            setModalState(() {
+              isPinging = false;
+              if (res.ok) {
+                pingStatus = '✓ Connected successfully (HTTP 200 Live • ${res.latencyMs}ms)';
+                statusColor = const Color(0xFF059669);
+                // Automatically save active server host
+                LocalStorageService.saveServerHost(testTarget);
+                TriageApiClient.customServerHost = testTarget;
+              } else {
+                pingStatus = '⚠️ ${res.message}';
+                statusColor = const Color(0xFFD97706);
+              }
+            });
+          }
+
+          return Container(
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -1514,32 +1563,32 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                     label: const Text('Render (Cloud)', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF0284C7))),
                     avatar: const Icon(Icons.cloud_done_rounded, size: 14, color: Color(0xFF0284C7)),
                     backgroundColor: const Color(0xFFE0F2FE),
-                    onPressed: () {
-                      controller.text = 'https://future-health-2026.onrender.com';
-                      setModalState(() {
-                        pingStatus = null;
-                      });
-                    },
+                    onPressed: isPinging
+                        ? null
+                        : () {
+                            controller.text = 'https://future-health-2026.onrender.com';
+                            executePing('https://future-health-2026.onrender.com');
+                          },
                   ),
                   ActionChip(
                     label: const Text('Local Wi-Fi', style: TextStyle(fontSize: 10.5)),
                     avatar: const Icon(Icons.wifi_rounded, size: 14),
-                    onPressed: () {
-                      controller.text = 'http://192.168.18.14:8000';
-                      setModalState(() {
-                        pingStatus = null;
-                      });
-                    },
+                    onPressed: isPinging
+                        ? null
+                        : () {
+                            controller.text = 'http://192.168.18.14:8000';
+                            executePing('http://192.168.18.14:8000');
+                          },
                   ),
                   ActionChip(
                     label: const Text('USB Tunnel', style: TextStyle(fontSize: 10.5)),
                     avatar: const Icon(Icons.usb_rounded, size: 14),
-                    onPressed: () {
-                      controller.text = 'http://127.0.0.1:8000';
-                      setModalState(() {
-                        pingStatus = null;
-                      });
-                    },
+                    onPressed: isPinging
+                        ? null
+                        : () {
+                            controller.text = 'http://127.0.0.1:8000';
+                            executePing('http://127.0.0.1:8000');
+                          },
                   ),
                 ],
               ),
@@ -1583,53 +1632,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                       ),
                       onPressed: isPinging
                           ? null
-                          : () async {
-                              final testTarget = controller.text.trim();
-                              if (testTarget.isEmpty) {
-                                setModalState(() {
-                                  pingStatus = 'Please enter a server URL to test.';
-                                  statusColor = const Color(0xFFDC2626);
-                                });
-                                return;
-                              }
-                              
-                              elapsedSeconds = 0.0;
-                              setModalState(() {
-                                isPinging = true;
-                                pingStatus = 'Pinging Cloud Gateway... (0.0s)';
-                                statusColor = const Color(0xFF0284C7);
-                              });
-
-                              pingTicker?.cancel();
-                              pingTicker = Timer.periodic(const Duration(milliseconds: 100), (t) {
-                                if (!modalCtx.mounted) {
-                                  t.cancel();
-                                  return;
-                                }
-                                elapsedSeconds += 0.1;
-                                setModalState(() {
-                                  pingStatus = 'Pinging Cloud Gateway... (${elapsedSeconds.toStringAsFixed(1)}s)';
-                                });
-                              });
-
-                              final res = await TriageApiClient.pingServerDetailed(testTarget);
-                              pingTicker?.cancel();
-
-                              if (!modalCtx.mounted) return;
-                              setModalState(() {
-                                isPinging = false;
-                                if (res.ok) {
-                                  pingStatus = '✓ Connected successfully (HTTP 200 Live • ${res.latencyMs}ms)';
-                                  statusColor = const Color(0xFF059669);
-                                  // Automatically save active server host
-                                  LocalStorageService.saveServerHost(testTarget);
-                                  TriageApiClient.customServerHost = testTarget;
-                                } else {
-                                  pingStatus = '⚠️ ${res.message}';
-                                  statusColor = const Color(0xFFD97706);
-                                }
-                              });
-                            },
+                          : () => executePing(controller.text),
                       icon: isPinging
                           ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.network_ping_rounded, size: 16),
@@ -1673,7 +1676,8 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
               ),
             ],
           ),
-        ),
+        );
+        },
       ),
     ).then((_) {
       pingTicker?.cancel();
