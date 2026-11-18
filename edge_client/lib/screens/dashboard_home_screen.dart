@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:io';
 import '../models/saved_scan_record.dart';
@@ -59,7 +62,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   Future<void> _loadRemoteConfigAndUpdates() async {
     try {
       final config = await TriageApiClient.fetchRemoteConfig();
-      final update = await TriageApiClient.checkForUpdates('3.0.0');
+      final update = await TriageApiClient.checkForUpdates(TriageApiClient.currentAppVersion);
       if (mounted) {
         setState(() {
           if (config != null && config['announcement_banner']?['enabled'] == true) {
@@ -1786,112 +1789,324 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
 
   void _showUpdateDialog(BuildContext context) {
     if (_availableUpdate == null) return;
-    final version = _availableUpdate!['latest_version'] ?? '3.1.0';
+    final version = _availableUpdate!['latest_version'] ?? TriageApiClient.currentAppVersion;
     final changelog = (_availableUpdate!['changelog'] as List?)?.map((e) => e.toString()).toList() ?? [];
+
+    bool isDownloading = false;
+    double progress = 0.0;
+    String statusText = widget.isArabic ? 'جاهز للتحميل والتثبيت' : 'Ready for download & in-place update.';
+    bool isCompleted = false;
+    bool hasFailed = false;
+    File? downloadedFile;
+    http.Client? activeClient;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (modalCtx) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(color: const Color(0xFFCBD5E1), borderRadius: BorderRadius.circular(2)),
-              ),
+      builder: (modalCtx) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) {
+          Future<void> startDownload() async {
+            setDialogState(() {
+              isDownloading = true;
+              hasFailed = false;
+              progress = 0.0;
+              statusText = widget.isArabic
+                  ? 'جاري الاتصال بالخادم السحابي...'
+                  : 'Connecting to Render Cloud Gateway...';
+            });
+
+            try {
+              final customHost = TriageApiClient.customServerHost;
+              final String baseUrl = (customHost != null && customHost.isNotEmpty)
+                  ? customHost.trim()
+                  : 'https://future-health-2026.onrender.com';
+              final cleanBase = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+              final downloadUri = Uri.parse('$cleanBase/static/SkinGuard-Master-v4.apk');
+
+              activeClient = http.Client();
+              final request = http.Request('GET', downloadUri);
+              final streamedResponse = await activeClient!.send(request);
+
+              if (streamedResponse.statusCode != 200) {
+                throw Exception('Server returned HTTP ${streamedResponse.statusCode}');
+              }
+
+              final contentLength = streamedResponse.contentLength ?? (97 * 1024 * 1024);
+              setDialogState(() {
+                statusText = widget.isArabic
+                    ? 'جاري تحميل التحديث الرسمي من السحابة...'
+                    : 'Streaming signed APK package from cloud...';
+              });
+
+              final tempDir = await getTemporaryDirectory();
+              final savePath = '${tempDir.path}/SkinGuard-Master-v4.apk';
+              final file = File(savePath);
+              if (await file.exists()) {
+                await file.delete();
+              }
+              final sink = file.openWrite();
+
+              int received = 0;
+              await streamedResponse.stream.listen(
+                (chunk) {
+                  received += chunk.length;
+                  sink.add(chunk);
+                  final ratio = (received / contentLength).clamp(0.0, 1.0);
+                  setDialogState(() {
+                    progress = ratio;
+                    final mbRecv = (received / (1024 * 1024)).toStringAsFixed(1);
+                    final mbTotal = (contentLength / (1024 * 1024)).toStringAsFixed(1);
+                    final pct = (ratio * 100).toStringAsFixed(0);
+                    statusText = widget.isArabic
+                        ? 'جاري التنزيل: $mbRecv ميغابايت / $mbTotal ميغابايت ($pct%)'
+                        : 'Downloading: $mbRecv MB / $mbTotal MB ($pct%)';
+                  });
+                },
+                cancelOnError: true,
+              ).asFuture();
+
+              await sink.flush();
+              await sink.close();
+
+              setDialogState(() {
+                isDownloading = false;
+                isCompleted = true;
+                downloadedFile = file;
+                statusText = widget.isArabic
+                    ? '✓ اكتمل التنزيل بنجاح! جاري فتح معالج التثبيت...'
+                    : '✓ Download complete! Launching package installer...';
+              });
+
+              // Trigger native Android installer intent
+              try {
+                const channel = MethodChannel('com.futurehealth.skinguard/updater');
+                await channel.invokeMethod('installApk', {'filePath': file.path});
+              } catch (e) {
+                debugPrint('Native installer notice: $e');
+              }
+            } catch (err) {
+              setDialogState(() {
+                isDownloading = false;
+                hasFailed = true;
+                statusText = widget.isArabic
+                    ? 'تعذر التنزيل: $err. يرجى التحقق من الاتصال.'
+                    : 'Download failed: $err. Please check network connection.';
+              });
+            }
+          }
+
+          return Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
-            const SizedBox(height: 16),
-            Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: const Color(0xFFE0F2FE), borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.system_update_rounded, color: Color(0xFF0284C7), size: 24),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'SkinGuard UAE Update Available',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
-                    ),
-                    Text(
-                      'Release Version: v$version • Cloud-Hosted on Render',
-                      style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'WHAT IS NEW IN THIS RELEASE:',
-              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 0.6),
-            ),
-            const SizedBox(height: 8),
-            ...changelog.map(
-              (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('✓ ', style: TextStyle(color: Color(0xFF059669), fontWeight: FontWeight.bold)),
-                    Expanded(child: Text(item, style: const TextStyle(fontSize: 11.5, color: Color(0xFF334155)))),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    onPressed: () => Navigator.pop(modalCtx),
-                    icon: const Icon(Icons.close_rounded, size: 16),
-                    label: const Text('Later', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(color: const Color(0xFFCBD5E1), borderRadius: BorderRadius.circular(2)),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0284C7),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? const Color(0xFFECFDF5)
+                            : (hasFailed ? const Color(0xFFFEF2F2) : const Color(0xFFE0F2FE)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        isCompleted
+                            ? Icons.check_circle_rounded
+                            : (hasFailed ? Icons.error_outline_rounded : Icons.system_update_rounded),
+                        color: isCompleted
+                            ? const Color(0xFF059669)
+                            : (hasFailed ? const Color(0xFFDC2626) : const Color(0xFF0284C7)),
+                        size: 24,
+                      ),
                     ),
-                    onPressed: () {
-                      Navigator.pop(modalCtx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Color(0xFF059669),
-                          content: Text('Downloading SkinGuard-Master update from Render cloud...'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.isArabic ? 'تحديث نظام سكين جارد' : 'SkinGuard UAE System Update',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
+                          ),
+                          Text(
+                            widget.isArabic
+                                ? 'الإصدار المعتمد: v$version • مستضاف سحابياً'
+                                : 'Release Version: v$version • Cloud-Hosted on Render',
+                            style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Download Progress Card (When Downloading or Completed)
+                if (isDownloading || isCompleted || hasFailed) ...[
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isCompleted
+                          ? const Color(0xFFF0FDF4)
+                          : (hasFailed ? const Color(0xFFFEF2F2) : const Color(0xFFF8FAFC)),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isCompleted
+                            ? const Color(0xFFBBF7D0)
+                            : (hasFailed ? const Color(0xFFFECACA) : const Color(0xFFE2E8F0)),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              isCompleted
+                                  ? (widget.isArabic ? 'حزمة التحديث جاهزة' : 'Update Package Ready')
+                                  : (hasFailed
+                                      ? (widget.isArabic ? 'خطأ في التنزيل' : 'Download Error')
+                                      : (widget.isArabic ? 'جاري تنزيل التحديث...' : 'Downloading OTA Update...')),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isCompleted
+                                    ? const Color(0xFF059669)
+                                    : (hasFailed ? const Color(0xFFDC2626) : const Color(0xFF0284C7)),
+                              ),
+                            ),
+                            if (isDownloading)
+                              Text(
+                                '${(progress * 100).toStringAsFixed(0)}%',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
+                              ),
+                          ],
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.download_rounded, size: 16),
-                    label: const Text('Update Now', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: LinearProgressIndicator(
+                            value: isCompleted ? 1.0 : (isDownloading ? progress : null),
+                            minHeight: 8,
+                            backgroundColor: const Color(0xFFE2E8F0),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              isCompleted ? const Color(0xFF059669) : const Color(0xFF0284C7),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          statusText,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: hasFailed ? const Color(0xFFDC2626) : const Color(0xFF64748B),
+                            fontWeight: hasFailed ? FontWeight.w600 : FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(height: 16),
+                ] else ...[
+                  // Changelog Preview
+                  Text(
+                    widget.isArabic ? 'أبرز التحسينات في هذا الإصدار:' : 'WHAT IS NEW IN THIS RELEASE:',
+                    style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 0.6),
+                  ),
+                  const SizedBox(height: 8),
+                  ...changelog.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('✓ ', style: TextStyle(color: Color(0xFF059669), fontWeight: FontWeight.bold)),
+                          Expanded(child: Text(item, style: const TextStyle(fontSize: 11.5, color: Color(0xFF334155)))),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Action Buttons
+                Row(
+                  children: [
+                    if (!isDownloading) ...[
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          onPressed: () {
+                            activeClient?.close();
+                            Navigator.pop(modalCtx);
+                          },
+                          icon: const Icon(Icons.close_rounded, size: 16),
+                          label: Text(
+                            widget.isArabic ? 'إغلاق' : 'Close',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isCompleted ? const Color(0xFF059669) : const Color(0xFF0284C7),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: isDownloading
+                            ? null
+                            : (isCompleted
+                                ? () async {
+                                    if (downloadedFile != null) {
+                                      const channel = MethodChannel('com.futurehealth.skinguard/updater');
+                                      await channel.invokeMethod('installApk', {'filePath': downloadedFile!.path});
+                                    }
+                                  }
+                                : startDownload),
+                        icon: isDownloading
+                            ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : Icon(isCompleted ? Icons.system_update_alt_rounded : Icons.download_rounded, size: 16),
+                        label: Text(
+                          isDownloading
+                              ? (widget.isArabic ? 'جاري التنزيل...' : 'Downloading...')
+                              : (isCompleted
+                                  ? (widget.isArabic ? 'تثبيت التحديث' : 'Install Update')
+                                  : (hasFailed
+                                      ? (widget.isArabic ? 'إعادة المحاولة' : 'Retry Update')
+                                      : (widget.isArabic ? 'تحديث الآن' : 'Update Now'))),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

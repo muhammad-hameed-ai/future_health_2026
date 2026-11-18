@@ -159,15 +159,17 @@ class TriageApiClient {
     return null;
   }
 
+  static const String currentAppVersion = '4.0.0';
+
   /// Checks for available Over-The-Air app updates from Render cloud backend.
-  static Future<Map<String, dynamic>?> checkForUpdates([String currentVersion = '3.0.0']) async {
+  static Future<Map<String, dynamic>?> checkForUpdates([String currentVersion = currentAppVersion]) async {
     for (final baseUrl in candidateBaseUrls) {
       try {
         final uri = Uri.parse('$baseUrl/app/version');
-        final res = await http.get(uri).timeout(const Duration(seconds: 3));
+        final res = await http.get(uri).timeout(const Duration(seconds: 4));
         if (res.statusCode == 200) {
           final data = jsonDecode(res.body) as Map<String, dynamic>;
-          final latest = data['latest_version'] as String? ?? '3.0.0';
+          final latest = data['latest_version'] as String? ?? currentAppVersion;
           if (latest != currentVersion) {
             return data;
           }
