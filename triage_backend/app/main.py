@@ -135,13 +135,36 @@ async def welcome_page():
         return FileResponse(welcome_path, media_type="text/html")
     return FileResponse(os.path.join(WEB_DIST_DIR, "index.html"))
 
+@app.get("/portal")
+@app.get("/showcase")
+async def portal_page():
+    """Serves the master executive showcase website."""
+    portal_path = os.path.join(STATIC_DIR, "portal.html")
+    if os.path.exists(portal_path):
+        return FileResponse(portal_path, media_type="text/html")
+    return RedirectResponse(url="/app/")
+
+@app.get("/flutter_bootstrap.js")
+async def flutter_bootstrap_fallback():
+    fpath = os.path.join(WEB_DIST_DIR, "flutter_bootstrap.js")
+    if os.path.exists(fpath):
+        return FileResponse(fpath, media_type="application/javascript")
+    raise HTTPException(status_code=404)
+
+@app.get("/manifest.json")
+async def manifest_fallback():
+    fpath = os.path.join(WEB_DIST_DIR, "manifest.json")
+    if os.path.exists(fpath):
+        return FileResponse(fpath, media_type="application/json")
+    raise HTTPException(status_code=404)
+
 @app.get("/")
 async def root(request: Request):
-    """Root landing endpoint providing clinical gateway operational status and endpoints."""
-    # When accessed directly from a human web browser, seamlessly route to the Flutter Web App
+    """Root landing endpoint: delivers executive showcase portal to browsers, JSON to API clients."""
     accept = request.headers.get("accept", "")
-    if "text/html" in accept and os.path.exists(WEB_DIST_DIR):
-        return RedirectResponse(url="/app/")
+    portal_path = os.path.join(STATIC_DIR, "portal.html")
+    if "text/html" in accept and os.path.exists(portal_path):
+        return FileResponse(portal_path, media_type="text/html")
 
     return {
         "platform": "SkinGuard UAE • Future Health Challenge 2026",
@@ -149,7 +172,8 @@ async def root(request: Request):
         "status": "online",
         "accreditation": "Abu Dhabi DoH & Malaffi HIE Standards Compliance",
         "endpoints": {
-            "web_application": "/app",
+            "showcase_portal": "/portal",
+            "web_application": "/app/",
             "health": "/health",
             "triage": "/api/v1/triage",
             "app_config": "/api/v1/app/config",
