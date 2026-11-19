@@ -160,8 +160,11 @@ async def manifest_fallback():
 
 @app.get("/")
 async def root(request: Request):
-    """Root landing endpoint: delivers official UAE Digital Health mobile view to browsers, JSON to API clients."""
+    """Root landing endpoint: delivers master executive showcase website to browsers, JSON to API clients."""
     accept = request.headers.get("accept", "")
+    portal_path = os.path.join(STATIC_DIR, "portal.html")
+    if "text/html" in accept and os.path.exists(portal_path):
+        return FileResponse(portal_path, media_type="text/html")
     welcome_path = os.path.join(STATIC_DIR, "welcome.html")
     if "text/html" in accept and os.path.exists(welcome_path):
         return FileResponse(welcome_path, media_type="text/html")
