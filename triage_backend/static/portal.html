@@ -974,14 +974,8 @@
                   <span style="font-size: 0.75rem; font-weight: 800; color: var(--brand-primary);" id="mockupHeaderTag">SKINGUARD UAE</span>
                   <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);" id="mockupHeaderRight">العربية</span>
                 </div>
-                <div class="screen-body">
-                  <div class="mockup-visual" id="mockupVisualBox">
-                    <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="var(--brand-primary)" stroke-width="1.8">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 001.371 4.545M12 21a9.969 9.969 0 006.32-2.25" />
-                    </svg>
-                  </div>
-                  <h4 style="font-size: 1.1rem; font-weight: 800; color: var(--text-heading);" id="mockupTitle">Citizen Home Triage</h4>
-                  <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px;" id="mockupDesc">Select 1-Tap Guest Access to evaluate unusual skin spots immediately.</p>
+                <div id="mockupScreenBody" style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 10px 0;">
+                  <!-- Dynamically rendered custom visual screen for each step -->
                 </div>
                 <div style="background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; text-align: center;">
                   <span style="font-size: 0.75rem; font-weight: 800; color: #166534;" id="mockupStatusPill">● READY FOR TRIAGE</span>
@@ -1298,10 +1292,25 @@
         ],
         headerTag: "SKINGUARD UAE",
         headerRight: "العربية",
-        title: "Citizen Home Triage",
-        desc: "Select 1-Tap Guest Access to evaluate unusual skin spots immediately.",
-        status: "● READY FOR TRIAGE",
-        statusColor: "#166534"
+        status: "● READY FOR TRIAGE (ZERO PII)",
+        statusColor: "#166534",
+        screenHtml: `
+          <div style="text-align: center; padding: 12px 6px;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: #E6F4F2; border: 2px dashed #08766F; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(8, 118, 111, 0.15);">
+              <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="#08766F" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 001.371 4.545M12 21a9.969 9.969 0 006.32-2.25" />
+              </svg>
+            </div>
+            <h4 style="font-size: 1.15rem; font-weight: 800; color: #0F172A; margin-bottom: 6px;">Citizen Home Triage</h4>
+            <p style="font-size: 0.8rem; color: #64748B; margin-bottom: 18px; line-height: 1.4;">Zero login barrier. Instant on-device screening with biometric privacy protection.</p>
+            <div style="background: linear-gradient(135deg, #08766F, #044E48); color: #fff; font-size: 0.85rem; font-weight: 700; padding: 12px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(8,118,111,0.25);">
+              1-Tap Citizen Guest Access
+            </div>
+            <div style="background: #FFFFFF; border: 1px solid #CBD5E1; color: #334155; font-size: 0.8rem; font-weight: 700; padding: 9px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>🇦🇪 Sign in with UAE PASS</span>
+            </div>
+          </div>
+        `
       },
       2: {
         badge: "PHASE 2: OPTICAL QUALITY PRE-SCAN",
@@ -1314,10 +1323,39 @@
         ],
         headerTag: "OPTICAL PRE-SCAN",
         headerRight: "GATE 2 ACTIVE",
-        title: "Optical Quality Passed",
-        desc: "Focus: 4.82 > 3.2 • Glare: 4.2% • Non-Skin Entropy: 0.02 (Safe)",
-        status: "● OPTICAL GATE PASSED",
-        statusColor: "#166534"
+        status: "● OPTICAL QUALITY PASSED",
+        statusColor: "#166534",
+        screenHtml: `
+          <div style="padding: 4px 0;">
+            <div style="position: relative; width: 100%; height: 200px; background: #0F172A; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.7);">
+              <div style="position: absolute; top: 10px; left: 10px; width: 14px; height: 14px; border-top: 2px solid #22C55E; border-left: 2px solid #22C55E;"></div>
+              <div style="position: absolute; top: 10px; right: 10px; width: 14px; height: 14px; border-top: 2px solid #22C55E; border-right: 2px solid #22C55E;"></div>
+              <div style="position: absolute; bottom: 10px; left: 10px; width: 14px; height: 14px; border-bottom: 2px solid #22C55E; border-left: 2px solid #22C55E;"></div>
+              <div style="position: absolute; bottom: 10px; right: 10px; width: 14px; height: 14px; border-bottom: 2px solid #22C55E; border-right: 2px solid #22C55E;"></div>
+              
+              <div style="position: relative; width: 84px; height: 84px; border-radius: 50%; border: 2px solid #22C55E; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 44px; height: 38px; background: radial-gradient(circle at 35% 35%, #78350F 0%, #451A03 60%, #1C1917 100%); border-radius: 58% 42% 65% 35% / 48% 62% 38% 52%; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));"></div>
+                <div style="position: absolute; width: 10px; height: 1px; background: #22C55E;"></div>
+                <div style="position: absolute; width: 1px; height: 10px; background: #22C55E;"></div>
+              </div>
+              
+              <div style="position: absolute; top: 8px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); padding: 3px 8px; border-radius: 6px; font-family: monospace; font-size: 0.65rem; color: #4ADE80; border: 1px solid rgba(74,222,128,0.3);">
+                SHARPNESS: 4.82 > 3.2 ✓
+              </div>
+              <div style="position: absolute; bottom: 8px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); padding: 3px 8px; border-radius: 6px; font-family: monospace; font-size: 0.65rem; color: #4ADE80; border: 1px solid rgba(74,222,128,0.3);">
+                LUX: 420 (PASS) • GLARE: 2.1%
+              </div>
+            </div>
+
+            <div style="margin-top: 12px; text-align: center;">
+              <h4 style="font-size: 0.92rem; font-weight: 800; color: #0F172A;">Optical Quality Validated</h4>
+              <p style="font-size: 0.74rem; color: #64748B; margin-top: 2px;">Image is sharp, well-illuminated, and safe for inference.</p>
+              <div style="margin-top: 10px; background: #08766F; color: #fff; font-size: 0.8rem; font-weight: 700; padding: 10px; border-radius: 8px;">
+                📸 Capture & Analyze On-Device
+              </div>
+            </div>
+          </div>
+        `
       },
       3: {
         badge: "PHASE 3: DUAL-HEAD ONNX INFERENCE",
@@ -1330,10 +1368,47 @@
         ],
         headerTag: "ONNX INFERENCE",
         headerRight: "< 18 MS",
-        title: "Malignant Melanoma (High Risk)",
-        desc: "Stolz TDS: 8.17 • Argenziano: 5 Points • Isotonic Prob: 86.4%",
         status: "▲ URGENT 2WW REFERRAL",
-        statusColor: "#991B1B"
+        statusColor: "#991B1B",
+        screenHtml: `
+          <div style="padding: 4px 0;">
+            <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; padding: 10px; margin-bottom: 10px; text-align: center;">
+              <span style="background: #DC2626; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-transform: uppercase;">RED-FLAG URGENT</span>
+              <h4 style="font-size: 1.05rem; font-weight: 800; color: #991B1B; margin-top: 5px;">Malignant Melanoma Suspected</h4>
+              <div style="font-size: 0.72rem; color: #7F1D1D; font-weight: 600; margin-top: 2px;">ICD-10 C43.9 • Confidence: 86.4%</div>
+            </div>
+
+            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; color: #334155; margin-bottom: 2px;">
+                <span>Melanoma (MEL)</span>
+                <span style="color: #DC2626;">86.4%</span>
+              </div>
+              <div style="width: 100%; height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden; margin-bottom: 7px;">
+                <div style="width: 86.4%; height: 100%; background: #DC2626; border-radius: 3px;"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; color: #334155; margin-bottom: 2px;">
+                <span>Basal Cell Carcinoma (BCC)</span>
+                <span style="color: #D97706;">9.1%</span>
+              </div>
+              <div style="width: 100%; height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden; margin-bottom: 7px;">
+                <div style="width: 9.1%; height: 100%; background: #D97706; border-radius: 3px;"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; color: #334155; margin-bottom: 2px;">
+                <span>Benign Nevus (NV)</span>
+                <span style="color: #16A34A;">4.5%</span>
+              </div>
+              <div style="width: 100%; height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden;">
+                <div style="width: 4.5%; height: 100%; background: #16A34A; border-radius: 3px;"></div>
+              </div>
+            </div>
+
+            <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 7px; font-size: 0.68rem; color: #166534; text-align: center;">
+              ✓ Calibrated for Fitzpatrick Phototype IV (Zero Bias)
+            </div>
+          </div>
+        `
       },
       4: {
         badge: "PHASE 4: ANATOMICAL LOCALIZATION",
@@ -1346,10 +1421,39 @@
         ],
         headerTag: "ANATOMICAL MAP",
         headerRight: "ICD-10 C43.9",
-        title: "Lesion #2943: Left Forearm",
-        desc: "Dossier encrypted in local storage. Ready for physician sign-off.",
         status: "● DOSSIER SAVED (RAM ONLY)",
-        statusColor: "#166534"
+        statusColor: "#166534",
+        screenHtml: `
+          <div style="padding: 4px 0;">
+            <div style="position: relative; width: 100%; height: 170px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+              <svg width="80" height="145" viewBox="0 0 100 170" fill="none" style="opacity: 0.85;">
+                <circle cx="50" cy="18" r="14" fill="#CBD5E1" />
+                <path d="M32 38 C32 38 24 55 24 85 C24 95 34 105 40 105 L60 105 C66 105 76 95 76 85 C76 55 68 38 68 38 Z" fill="#CBD5E1" />
+                <path d="M24 45 C15 65 10 90 12 110" stroke="#08766F" stroke-width="8" stroke-linecap="round" />
+                <path d="M76 45 C85 65 90 90 88 110" stroke="#CBD5E1" stroke-width="8" stroke-linecap="round" />
+                <path d="M42 105 L38 165 M58 105 L62 165" stroke="#CBD5E1" stroke-width="10" stroke-linecap="round" />
+              </svg>
+
+              <div style="position: absolute; top: 74px; left: 78px; display: flex; align-items: center; gap: 4px;">
+                <div style="width: 14px; height: 14px; background: #DC2626; border-radius: 50%; box-shadow: 0 0 12px #DC2626; border: 2px solid #FFFFFF;"></div>
+                <span style="background: rgba(15,23,42,0.88); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">L. Forearm</span>
+              </div>
+            </div>
+
+            <div style="margin-top: 10px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px; font-size: 0.72rem;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; color: #0F172A; margin-bottom: 3px;">
+                <span>Lesion ID: #2943</span>
+                <span style="color: #08766F;">Baseline Recorded</span>
+              </div>
+              <div style="color: #64748B; font-size: 0.68rem; line-height: 1.3;">
+                Location: Left Forearm (L4) • Size: 5.2mm • Evolution tracker initialized for 90-day comparison.
+              </div>
+            </div>
+            <div style="margin-top: 8px; background: #08766F; color: #fff; font-size: 0.78rem; font-weight: 700; padding: 9px; border-radius: 8px; text-align: center;">
+              📂 Save to Encrypted Local Dossier
+            </div>
+          </div>
+        `
       },
       5: {
         badge: "PHASE 5: CLOSED-LOOP EMR NAVIGATION",
@@ -1362,10 +1466,33 @@
         ],
         headerTag: "MALAFFI HIE",
         headerRight: "HL7 FHIR R4",
-        title: "Cleveland Clinic Abu Dhabi",
-        desc: "Fast-Track 2WW Referral initiated. Assigned Navigator: Fatima Al-Mansouri, RN.",
         status: "● CLOSED-LOOP CONNECTED",
-        statusColor: "#166534"
+        statusColor: "#166534",
+        screenHtml: `
+          <div style="padding: 4px 0;">
+            <div style="background: #FFFFFF; border: 1.5px solid #08766F; border-radius: 14px; padding: 12px; box-shadow: 0 4px 14px rgba(8,118,111,0.12); margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: #08766F; text-transform: uppercase; background: #E6F4F2; padding: 2px 7px; border-radius: 999px;">SEHA / MALAFFI</span>
+                <span style="font-size: 0.68rem; font-weight: 800; color: #DC2626;">⚡ 48H FAST-TRACK</span>
+              </div>
+
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: #0F172A; margin-bottom: 3px;">Cleveland Clinic Abu Dhabi</h4>
+              <div style="font-size: 0.7rem; color: #475569; line-height: 1.3; margin-bottom: 8px;">
+                Specialist Dermatology & Cutaneous Oncology Referral.
+              </div>
+
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 7px; font-size: 0.66rem; color: #334155; line-height: 1.4;">
+                <strong>Care Navigator:</strong> Fatima Al-Mansouri, RN<br>
+                <strong>FHIR DiagnosticReport:</strong> <code>FHIR-R4-2026-943</code><br>
+                <strong>Status:</strong> Clinic Appointment Dispatched
+              </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #08766F, #044E48); color: #fff; font-size: 0.8rem; font-weight: 700; padding: 10px; border-radius: 9px; text-align: center; box-shadow: 0 4px 10px rgba(8,118,111,0.25);">
+              🏥 Confirm Malaffi Clinic Booking
+            </div>
+          </div>
+        `
       }
     };
 
@@ -1390,13 +1517,18 @@
 
       document.getElementById('mockupHeaderTag').textContent = data.headerTag;
       document.getElementById('mockupHeaderRight').textContent = data.headerRight;
-      document.getElementById('mockupTitle').textContent = data.title;
-      document.getElementById('mockupDesc').textContent = data.desc;
+      document.getElementById('mockupScreenBody').innerHTML = data.screenHtml;
       
       const statusPill = document.getElementById('mockupStatusPill');
       statusPill.textContent = data.status;
       statusPill.style.color = data.statusColor;
     }
+
+    // Initialize with Step 1 immediately
+    switchStep(1);
+    document.addEventListener('DOMContentLoaded', () => {
+      switchStep(1);
+    });
   </script>
 </body>
 </html>
